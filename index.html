@@ -6,27 +6,31 @@
     <title>লেনদেন খাতা</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; }
-        .container { max-width: 500px; margin: auto; background: white; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding-bottom: 20px; }
-        .header { background-color: #4CAF50; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; }
-        .nav { display: flex; justify-content: space-around; background: #333; padding: 10px 0; position: sticky; top: 0; z-index: 100; }
-        .nav button { background: none; border: none; color: white; cursor: pointer; font-size: 14px; }
+        .container { max-width: 100%; margin: auto; background: white; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding-bottom: 20px; box-sizing: border-box; }
+        .header { background-color: #4CAF50; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; position: sticky; top: 0; z-index: 100; }
+        .nav { display: flex; justify-content: space-around; background: #333; padding: 10px 0; position: sticky; top: 55px; z-index: 99; flex-wrap: wrap; }
+        .nav button { background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 5px 10px; }
         .nav button.active { color: #4CAF50; font-weight: bold; border-bottom: 2px solid #4CAF50; }
-        .section { padding: 20px; display: none; }
+        .section { padding: 20px; display: none; box-sizing: border-box; }
         .section.active { display: block; }
-        input, select, button { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;}
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; font-size: 15px;}
         button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #45a049; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
-        .btn-danger { background-color: #f44336; padding: 5px 10px; font-size: 12px; width: auto; }
-        .btn-edit { background-color: #ff9800; padding: 5px 10px; font-size: 12px; width: auto; margin-right: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .btn-danger { background-color: #f44336; padding: 6px 12px; font-size: 12px; width: auto; }
+        .btn-edit { background-color: #ff9800; padding: 6px 12px; font-size: 12px; width: auto; margin-right: 5px; }
+        
+        /* Mobile Table Scroll */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 400px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 13px; }
-        th { background-color: #f2f2f2; }
-        .outstanding-card { background: #ffebee; padding: 15px; margin-bottom: 10px; border-left: 5px solid #f44336; border-radius: 4px; font-size: 14px; position: relative; }
+        th { background-color: #f2f2f2; white-space: nowrap; }
+        
+        .outstanding-card { background: #ffebee; padding: 15px; margin-bottom: 10px; border-left: 5px solid #f44336; border-radius: 4px; font-size: 14px; position: relative; word-wrap: break-word; }
         .logout-btn { background: #f44336; padding: 5px 10px; font-size: 12px; width: auto; float: right; margin-top: -5px;}
         
         /* Toast Notification */
-        .toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 12px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; font-size: 14px; }
+        .toast { visibility: hidden; min-width: 80%; max-width: 300px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 12px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; font-size: 14px; }
         .toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         .toast.error { background-color: #f44336; }
         .toast.success { background-color: #4CAF50; }
@@ -35,15 +39,22 @@
 
         /* Edit Modal */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
-        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border-radius: 8px; width: 80%; max-width: 400px; }
+        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; box-sizing: border-box; }
         .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
 
         /* Total Outstanding Box */
         .total-box { background: #4CAF50; color: white; padding: 10px 15px; border-radius: 5px; text-align: right; font-weight: bold; font-size: 16px; margin-bottom: 15px; }
         
         /* Pagination */
-        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-        .pagination button { width: auto; padding: 5px 15px; }
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .pagination button { width: auto; padding: 8px 15px; }
+        
+        /* Mobile responsiveness tweaks */
+        @media (max-width: 480px) {
+            .header { font-size: 18px; padding: 12px; }
+            .section { padding: 15px; }
+            input, select, button { font-size: 14px; padding: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -56,9 +67,12 @@
             <input type="text" id="username" placeholder="ইউজারনেম (শুধু সাইন আপ এর সময়)" style="display:none;">
             <input type="text" id="email" placeholder="ইমেইল বা ইউজারনেম (লগইন এর সময়)">
             <input type="password" id="password" placeholder="পাসওয়ার্ড">
-            <button id="signup-btn" onclick="signup()">সাইন আপ</button>
+            
+            <!-- লগইন বাটন উপরে, সাইন আপ বাটন নিচে -->
             <button onclick="login()" style="background:#2196F3">লগইন</button>
-            <button onclick="toggleForgotPassword()" style="background:transparent; color:blue; border:1px solid blue">পাসওয়ার্ড ভুলে গেছি?</button>
+            <button id="signup-btn" onclick="signup()">সাইন আপ</button>
+            
+            <button onclick="toggleForgotPassword()" style="background:transparent; color:blue; border:1px solid blue; margin-top:15px;">পাসওয়ার্ড ভুলে গেছি?</button>
             <div id="forgot-section" style="display:none; margin-top:10px;">
                 <input type="email" id="reset-email" placeholder="আপনার রেজিস্টার্ড ইমেইল দিন">
                 <button onclick="resetPassword()" style="background:#ff9800">রিকভারি লিংক পাঠান</button>
@@ -102,7 +116,9 @@
         <div id="history-section" class="section">
             <h3>ইতিহাস (পেজিনেশন)</h3>
             <input type="text" id="search-name" placeholder="নাম লিখে সার্চ করুন" onkeyup="renderHistory()">
-            <div id="history-table"></div>
+            <div class="table-wrap">
+                <div id="history-table"></div>
+            </div>
             <div class="pagination" id="pagination-controls"></div>
         </div>
 
@@ -137,10 +153,10 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, fetchSignInMethodsForEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// আপনার দেওয়া Firebase Config এখানে বসানো হয়েছে
+// আপনার Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyAQi-qGSjiLixmDw23MjnbvZEsdiVhfeek",
   authDomain: "due-tracking-app.firebaseapp.com",
@@ -161,6 +177,7 @@ window.db = db;
 let allTransactions = [];
 let currentPage = 1;
 const itemsPerPage = 8;
+let inactivityTimer;
 
 // Toast Function
 window.showToast = function(message, isError = false) {
@@ -170,19 +187,58 @@ window.showToast = function(message, isError = false) {
     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
 }
 
+// Date Formatter (DD-MM-YYYY)
+function formatDate(dateStr) {
+    if(!dateStr) return "";
+    const parts = dateStr.split('-');
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+}
+
+// Set Default Current Date
+function setDefaultDates() {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+    
+    const giveDate = document.getElementById('give-date');
+    const takeDate = document.getElementById('take-date');
+    if(giveDate) giveDate.value = todayStr;
+    if(takeDate) takeDate.value = todayStr;
+}
+
+// Auto Logout after 5 minutes
+function setupInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    if (auth.currentUser) {
+        inactivityTimer = setTimeout(() => {
+            signOut(auth).then(() => {
+                showToast("৫ মিনিট নিষ্ক্রিয় থাকার কারণে অটো লগআউট হয়েছে।", true);
+            });
+        }, 300000); // 5 minutes = 300,000 ms
+    }
+}
+['mousemove', 'mousedown', 'keydown', 'touchstart'].forEach(event => {
+    document.addEventListener(event, setupInactivityTimer, false);
+});
+
 onAuthStateChanged(auth, (user) => {
     if (user) {
         document.getElementById('auth-section').style.display = 'none';
         document.getElementById('app-section').style.display = 'block';
+        setDefaultDates(); // লগইন করার সাথে সাথে আজকের তারিখ বসে যাবে
         loadOutstanding();
         loadHistory();
         loadNames();
+        setupInactivityTimer();
     } else {
         document.getElementById('auth-section').style.display = 'block';
         document.getElementById('app-section').style.display = 'none';
-        // Reset to login view
         document.getElementById('username').style.display = 'none';
         document.getElementById('email').placeholder = 'ইমেইল বা ইউজারনেম (লগইন এর সময়)';
+        document.getElementById('signup-btn').innerText = 'সাইন আপ';
+        clearTimeout(inactivityTimer);
     }
 });
 
@@ -197,6 +253,14 @@ window.signup = async function() {
     const password = document.getElementById('password').value;
     const signupBtn = document.getElementById('signup-btn');
     
+    // Show username field first if hidden
+    if(document.getElementById('username').style.display === 'none') {
+        document.getElementById('username').style.display = 'block';
+        document.getElementById('email').placeholder = 'ইমেইল (যেমন: name@gmail.com)';
+        signupBtn.innerText = 'সাইন আপ নিশ্চিত করুন';
+        return;
+    }
+    
     if (!username || !email || !password) return showToast("সব ঘর পূরণ করুন!", true);
     if(password.length < 6) return showToast("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে!", true);
     
@@ -204,40 +268,20 @@ window.signup = async function() {
     signupBtn.disabled = true;
 
     try {
-        // Check if email already exists
-        const methods = await fetchSignInMethodsForEmail(auth, email);
-        if(methods.length > 0) {
-            showToast("এই ইমেইল দিয়ে আগেই সাইন আপ করা হয়েছে!", true);
-            signupBtn.innerText = "সাইন আপ";
-            signupBtn.disabled = false;
-            return;
-        }
-
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // Save username in Firestore
         await addDoc(collection(db, "users"), {
             uid: userCredential.user.uid,
             username: username,
             email: email
         });
-        
     } catch (e) {
-        showToast("এরর: " + e.message, true);
-        signupBtn.innerText = "সাইন আপ";
+        let err = e.message;
+        if(e.code === 'auth/email-already-in-use') err = "এই ইমেইল দিয়ে আগেই সাইন আপ করা হয়েছে!";
+        showToast(err, true);
+        signupBtn.innerText = "সাইন আপ নিশ্চিত করুন";
         signupBtn.disabled = false;
     }
 }
-
-// Show Username field when clicking Sign Up button
-document.getElementById('signup-btn').addEventListener('click', function(e) {
-    if(document.getElementById('username').style.display === 'none') {
-        e.preventDefault();
-        document.getElementById('username').style.display = 'block';
-        document.getElementById('email').placeholder = 'ইমেইল (যেমন: name@gmail.com)';
-        this.innerText = 'সাইন আপ নিশ্চিত করুন';
-        return;
-    }
-});
 
 window.login = async function() {
     const identifier = document.getElementById('email').value.trim();
@@ -246,7 +290,6 @@ window.login = async function() {
 
     let emailToLogin = identifier;
 
-    // If input is not an email, treat as username
     if(!identifier.includes('@')) {
         const q = query(collection(db, "users"), where("username", "==", identifier));
         const snapshot = await getDocs(q);
@@ -257,13 +300,17 @@ window.login = async function() {
     signInWithEmailAndPassword(auth, emailToLogin, password).catch(e => showToast("লগইন তথ্য ভুল হয়েছে!", true));
 }
 
+// Password Reset Fixed
 window.resetPassword = async function() {
     const email = document.getElementById('reset-email').value.trim();
     if(!email) return showToast("ইমেইল দিন!", true);
 
     try {
-        const methods = await fetchSignInMethodsForEmail(auth, email);
-        if(methods.length === 0) {
+        // ডাটাবেস থেকে চেক করা হচ্ছে ইমেইলটি রেজিস্টার্ড কি না
+        const q = query(collection(db, "users"), where("email", "==", email));
+        const snapshot = await getDocs(q);
+        
+        if(snapshot.empty) {
             showToast("Email not registered", true);
         } else {
             await sendPasswordResetEmail(auth, email);
@@ -281,6 +328,11 @@ window.showSection = function(id, btn) {
     document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     btn.classList.add('active');
+    
+    // ট্যাবে ঢোকার সময় আজকের তারিখ বসানো থাকবে
+    if(id === 'give-section' || id === 'take-section') {
+        setDefaultDates();
+    }
 }
 
 window.addTransaction = async function(type) {
@@ -298,6 +350,9 @@ window.addTransaction = async function(type) {
             amount: parseFloat(amount), uid: auth.currentUser.uid
         });
         showToast("সফলভাবে সেভ হয়েছে!", false);
+        document.getElementById(`${prefix}-name`).value = '';
+        document.getElementById(`${prefix}-mobile`).value = '';
+        document.getElementById(`${prefix}-amount`).value = '';
         loadOutstanding();
         loadHistory();
         loadNames();
@@ -322,7 +377,7 @@ window.loadHistory = function() {
         snapshot.forEach(doc => {
             allTransactions.push({ id: doc.id, ...doc.data() });
         });
-        allTransactions.sort((a, b) => b.date.localeCompare(a.date)); // Sort by date desc
+        allTransactions.sort((a, b) => b.date.localeCompare(a.date)); 
         renderHistory();
     });
 }
@@ -344,7 +399,7 @@ window.renderHistory = function() {
     } else {
         pageItems.forEach(d => {
             html += `<tr>
-                <td>${d.date}</td>
+                <td>${formatDate(d.date)}</td>
                 <td>${d.name} <br>(${d.mobile})</td>
                 <td style="color:red">${d.type === 'give' ? d.amount : ''}</td>
                 <td style="color:green">${d.type === 'take' ? d.amount : ''}</td>
@@ -358,10 +413,9 @@ window.renderHistory = function() {
     html += `</table>`;
     document.getElementById('history-table').innerHTML = html;
 
-    // Pagination Controls
     let pHtml = '';
     if(currentPage > 1) pHtml += `<button onclick="changePage(${currentPage - 1})">পূর্ববর্তী</button>`;
-    pHtml += `<span style="padding: 5px 10px; border: 1px solid #ccc; border-radius: 5px;">পেজ ${currentPage} / ${totalPages || 1}</span>`;
+    pHtml += `<span style="padding: 5px 10px; border: 1px solid #ccc; border-radius: 5px; display:flex; align-items:center;">পেজ ${currentPage} / ${totalPages || 1}</span>`;
     if(currentPage < totalPages) pHtml += `<button onclick="changePage(${currentPage + 1})">পরবর্তী</button>`;
     document.getElementById('pagination-controls').innerHTML = pHtml;
 }
@@ -424,7 +478,7 @@ window.loadOutstanding = function() {
         let html = '';
         for(let name in balances) {
             const outstanding = balances[name].given - balances[name].taken;
-            if(outstanding > 0) totalOutstanding += outstanding; // Add to total
+            if(outstanding > 0) totalOutstanding += outstanding;
             const color = outstanding > 0 ? 'red' : 'green';
             html += `<div class="outstanding-card">
                 <strong>${name}</strong> (${balances[name].mobile})<br>

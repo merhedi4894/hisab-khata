@@ -35,7 +35,6 @@
         .btn-link { background: transparent; color: #2196F3; border: 1px solid #2196F3; }
         .btn-link:hover { background: #f0f8ff; }
         
-        /* Spinner CSS */
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -80,7 +79,6 @@
 <body>
 
 <div class="container">
-    <!-- Auth Section -->
     <div id="auth-section">
         <div class="header">লেনদেন খাতা</div>
         <div class="section" style="display:block; max-width: 450px; margin: 0 auto;">
@@ -102,7 +100,6 @@
         </div>
     </div>
 
-    <!-- Main App Section -->
     <div id="app-section" style="display:none">
         <div class="header">
             লেনদেন খাতা 
@@ -120,7 +117,7 @@
             <h3>টাকা দিচ্ছি (ধার দিলাম)</h3>
             <div class="form-grid">
                 <div><label>তারিখ</label><input type="date" id="give-date"></div>
-                <div><label>নাম</label><input type="text" id="give-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('give')"></div>
+                <div><label>নাম</label><input type="text" id="give-name" list="names-list" placeholder="নাম লিখুন" onchange="autoFillMobile('give')"></div>
                 <div><label>মোবাইল নম্বর</label><input type="text" id="give-mobile" placeholder="মোবাইল নম্বর"></div>
                 <div><label>পরিমাণ (টাকা)</label><input type="number" id="give-amount" placeholder="পরিমাণ"></div>
                 <div class="full-width"><button onclick="addTransaction('give')">সেভ করুন</button></div>
@@ -131,7 +128,7 @@
             <h3>টাকা নিচ্ছি (পরিশোধ পেলাম)</h3>
             <div class="form-grid">
                 <div><label>তারিখ</label><input type="date" id="take-date"></div>
-                <div><label>নাম</label><input type="text" id="take-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('take')"></div>
+                <div><label>নাম</label><input type="text" id="take-name" list="names-list" placeholder="নাম লিখুন" onchange="autoFillMobile('take')"></div>
                 <div><label>মোবাইল নম্বর</label><input type="text" id="take-mobile" placeholder="মোবাইল নম্বর"></div>
                 <div><label>পরিমাণ (টাকা)</label><input type="number" id="take-amount" placeholder="পরিমাণ"></div>
                 <div class="full-width"><button onclick="addTransaction('take')" class="btn-secondary">সেভ করুন</button></div>
@@ -197,7 +194,7 @@ window.auth = auth;
 window.db = db;
 
 let allTransactions = [];
-let nameMobileMap = {}; // নাম ও মোবাইল নম্বর ম্যাপ করার জন্য
+let nameMobileMap = {}; 
 let outstandingData = [];
 let currentPage = 1;
 let currentOutstandingPage = 1;
@@ -230,10 +227,12 @@ function setDefaultDates() {
     if(takeDate) takeDate.value = todayStr;
 }
 
-// নাম লিখলে মোবাইল নম্বর অটো ফিল হবে
+// নাম সিলেক্ট করলে মোবাইল নম্বর অটো ফিল হবে (onchange দিয়ে কাজ করে)
 window.autoFillMobile = function(type) {
     const nameInput = document.getElementById(`${type}-name`).value.trim();
     const mobileInput = document.getElementById(`${type}-mobile`);
+    
+    // নামের সাথে মিলিয়ে মোবাইল নম্বর বসানো হচ্ছে
     if(nameMobileMap[nameInput]) {
         mobileInput.value = nameMobileMap[nameInput];
     }
@@ -246,7 +245,7 @@ function setupInactivityTimer() {
             signOut(auth).then(() => {
                 showToast("৫ মিনিট নিষ্ক্রিয় থাকার কারণে অটো লগআউট হয়েছে।", true);
             });
-        }, 300000); // 5 minutes
+        }, 300000); 
     }
 }
 ['mousemove', 'mousedown', 'keydown', 'touchstart'].forEach(event => {
@@ -279,7 +278,7 @@ window.toggleForgotPassword = function() {
 
 window.signup = async function() {
     const username = document.getElementById('username').value.trim();
-    const email = document.getElementById('email').value.trim().toLowerCase(); // lowercase
+    const email = document.getElementById('email').value.trim().toLowerCase();
     const password = document.getElementById('password').value;
     const signupBtn = document.getElementById('signup-btn');
     const signupText = document.getElementById('signup-text');
@@ -302,7 +301,7 @@ window.signup = async function() {
         await addDoc(collection(db, "users"), {
             uid: userCredential.user.uid,
             username: username,
-            email: email // lowercase save
+            email: email
         });
     } catch (e) {
         let err = e.message;
@@ -353,7 +352,7 @@ window.login = async function() {
 }
 
 window.resetPassword = async function() {
-    const email = document.getElementById('reset-email').value.trim().toLowerCase(); // lowercase
+    const email = document.getElementById('reset-email').value.trim().toLowerCase();
     const resetBtn = document.getElementById('reset-btn');
     const resetText = document.getElementById('reset-text');
     
@@ -363,6 +362,7 @@ window.resetPassword = async function() {
     resetBtn.disabled = true;
 
     try {
+        // ডাটাবেসে ইমেইল খুঁজে বের করা হচ্ছে
         const q = query(collection(db, "users"), where("email", "==", email));
         const snapshot = await getDocs(q);
         
@@ -424,7 +424,7 @@ window.loadNames = function() {
         snapshot.forEach(doc => {
             const d = doc.data();
             names.add(d.name);
-            nameMobileMap[d.name] = d.mobile; // নামের সাথে মোবাইল সেভ করছি
+            nameMobileMap[d.name] = d.mobile; // নামের সাথে মোবাইল ম্যাপ করা হচ্ছে
         });
         let html = '';
         names.forEach(name => html += `<option value="${name}">`);
@@ -446,7 +446,6 @@ window.loadHistory = function() {
 
 window.renderHistory = function() {
     const searchVal = document.getElementById('search-name').value.toLowerCase();
-    // নাম অথবা মোবাইল নম্বর দিয়ে সার্চ করার অপশন
     const filtered = allTransactions.filter(t => 
         t.name.toLowerCase().includes(searchVal) || (t.mobile && t.mobile.includes(searchVal))
     );
@@ -533,7 +532,7 @@ window.loadOutstanding = function() {
     onSnapshot(q, (snapshot) => {
         let balances = {};
         let totalOutstanding = 0;
-        outstandingData = []; // পেজিনেশনের জন্য আরে ক্লিয়ার
+        outstandingData = []; 
 
         snapshot.forEach(doc => {
             const d = doc.data();
@@ -579,7 +578,6 @@ window.renderOutstanding = function() {
     }
     document.getElementById('outstanding-list').innerHTML = html;
 
-    // Pagination Controls for Outstanding
     let pHtml = '';
     if(currentOutstandingPage > 1) pHtml += `<button onclick="changeOutstandingPage(${currentOutstandingPage - 1})">পূর্ববর্তী</button>`;
     pHtml += `<div class="page-info">পেজ ${currentOutstandingPage} / ${totalPages || 1}</div>`;

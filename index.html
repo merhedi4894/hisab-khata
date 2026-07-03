@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>হিসাব খাতা</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; }
+        .container { max-width: 500px; margin: auto; background: white; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { background-color: #4CAF50; color: white; padding: 15px; text-align: center; font-size: 20px; position: relative; }
+        .nav { display: flex; justify-content: space-around; background: #333; padding: 10px 0; position: sticky; top: 0; z-index: 100; }
+        .nav button { background: none; border: none; color: white; cursor: pointer; font-size: 14px; }
+        .nav button.active { color: #4CAF50; font-weight: bold; border-bottom: 2px solid #4CAF50; }
+        .section { padding: 20px; display: none; }
+        .section.active { display: block; }
+        input, select, button { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;}
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        .btn-danger { background-color: #f44336; padding: 5px; font-size: 12px; width: auto; }
+        .btn-edit { background-color: #ff9800; padding: 5px; font-size: 12px; width: auto; margin-right: 5px;}
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 13px; }
+        th { background-color: #f2f2f2; }
+        .outstanding-card { background: #ffebee; padding: 15px; margin-bottom: 10px; border-left: 5px solid #f44336; border-radius: 4px; font-size: 14px; }
+        .logout-btn { background: #f44336; padding: 5px 10px; font-size: 12px; width: auto; float: right; margin-top: -5px;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Auth Section -->
+    <div id="auth-section">
+        <div class="header">লগইন / সাইন আপ</div>
+        <div class="section" style="display:block">
+            <input type="email" id="email" placeholder="ইমেইল">
+            <input type="password" id="password" placeholder="পাসওয়ার্ড">
+            <button onclick="login()">লগইন</button>
+            <button onclick="signup()" style="background:#2196F3">সাইন আপ</button>
+            <button onclick="resetPassword()" style="background:transparent; color:blue; border:1px solid blue">পাসওয়ার্ড ভুলে গেছি?</button>
+        </div>
+    </div>
+
+    <!-- Main App Section -->
+    <div id="app-section" style="display:none">
+        <div class="header">
+            হিসাব খাতা 
+            <button class="logout-btn" onclick="logout()">লগআউট</button>
+        </div>
+        
+        <div class="nav">
+            <button id="nav-give" onclick="showSection('give-section', this)">টাকা দিচ্ছি</button>
+            <button id="nav-take" onclick="showSection('take-section', this)">টাকা নিচ্ছি</button>
+            <button id="nav-history" onclick="showSection('history-section', this)">ইতিহাস</button>
+            <button id="nav-outstanding" onclick="showSection('outstanding-section', this)">মোট বকেয়া</button>
+        </div>
+
+        <div id="give-section" class="section">
+            <h3>টাকা দিচ্ছি (ধার দিলাম)</h3>
+            <input type="date" id="give-date">
+            <input type="text" id="give-name" placeholder="নাম">
+            <input type="text" id="give-mobile" placeholder="মোবাইল নম্বর">
+            <input type="number" id="give-amount" placeholder="পরিমাণ (টাকা)">
+            <button onclick="addTransaction('give')">সেভ করুন</button>
+        </div>
+
+        <div id="take-section" class="section">
+            <h3>টাকা নিচ্ছি (পরিশোধ পেলাম)</h3>
+            <input type="date" id="take-date">
+            <input type="text" id="take-name" placeholder="নাম">
+            <input type="text" id="take-mobile" placeholder="মোবাইল নম্বর">
+            <input type="number" id="take-amount" placeholder="পরিমাণ (টাকা)">
+            <button onclick="addTransaction('take')">সেভ করুন</button>
+        </div>
+
+        <div id="history-section" class="section">
+            <h3>ইতিহাস</h3>
+            <input type="text" id="search-name" placeholder="নাম লিখে সার্চ করুন" onkeyup="searchHistory()">
+            <div id="history-table"></div>
+        </div>
+
+        <div id="outstanding-section" class="section">
+            <h3>মোট বকেয়া তালিকা</h3>
+            <div id="outstanding-list"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ⚠️ এখানে আপনার Firebase এর Config তথ্য বসান
+const firebaseConfig = {
+  apiKey: "AIzaSyAQi-qGSjiLixmDw23MjnbvZEsdiVhfeek",
+  authDomain: "due-tracking-app.firebaseapp.com",
+  projectId: "due-tracking-app",
+  storageBucket: "due-tracking-app.firebasestorage.app",
+  messagingSenderId: "733598933470",
+  appId: "1:733598933470:web:4ba0dd63240a96982a7d4f"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.auth = auth;
+window.db = db;
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('app-section').style.display = 'block';
+        loadOutstanding();
+    } else {
+        document.getElementById('auth-section').style.display = 'block';
+        document.getElementById('app-section').style.display = 'none';
+    }
+});
+
+window.login = function() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    signInWithEmailAndPassword(auth, email, password).catch(e => alert(e.message));
+}
+
+window.signup = function() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    createUserWithEmailAndPassword(auth, email, password).catch(e => alert(e.message));
+}
+
+window.resetPassword = function() {
+    const email = document.getElementById('email').value;
+    if(!email) return alert("আগে ইমেইল দিন।");
+    sendPasswordResetEmail(auth, email).then(() => alert("পাসওয়ার্ড রিসেট লিংক ইমেইলে পাঠানো হয়েছে।")).catch(e => alert(e.message));
+}
+
+window.logout = function() { signOut(auth); }
+
+window.showSection = function(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+}
+
+window.addTransaction = async function(type) {
+    const prefix = type === 'give' ? 'give' : 'take';
+    const date = document.getElementById(`${prefix}-date`).value;
+    const name = document.getElementById(`${prefix}-name`).value;
+    const mobile = document.getElementById(`${prefix}-mobile`).value;
+    const amount = document.getElementById(`${prefix}-amount`).value;
+
+    if(!date || !name || !amount) return alert("তারিখ, নাম এবং টাকার অংশ বাধ্যতামূলক!");
+
+    try {
+        await addDoc(collection(db, "transactions"), {
+            type: type, date: date, name: name, mobile: mobile,
+            amount: parseFloat(amount), uid: auth.currentUser.uid
+        });
+        alert("সফলভাবে সেভ হয়েছে!");
+        document.getElementById(`${prefix}-date`).value = '';
+        document.getElementById(`${prefix}-name`).value = '';
+        document.getElementById(`${prefix}-mobile`).value = '';
+        document.getElementById(`${prefix}-amount`).value = '';
+        loadOutstanding();
+    } catch (e) { alert(e.message); }
+}
+
+window.searchHistory = function() {
+    const searchVal = document.getElementById('search-name').value.toLowerCase();
+    const q = query(collection(db, "transactions"), where("uid", "==", auth.currentUser.uid));
+    onSnapshot(q, (snapshot) => {
+        let html = `<table><tr><th>তারিখ</th><th>নাম</th><th>দিলাম</th><th>পেলাম</th><th>অ্যাকশন</th></tr>`;
+        let found = false;
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            if(d.name.toLowerCase().includes(searchVal)) {
+                found = true;
+                html += `<tr>
+                    <td>${d.date}</td>
+                    <td>${d.name} <br>(${d.mobile})</td>
+                    <td style="color:red">${d.type === 'give' ? d.amount : ''}</td>
+                    <td style="color:green">${d.type === 'take' ? d.amount : ''}</td>
+                    <td><button class="btn-danger" onclick="deleteData('${doc.id}')">ডিলিট</button></td>
+                </tr>`;
+            }
+        });
+        html += `</table>`;
+        document.getElementById('history-table').innerHTML = found ? html : "<p>কোন ডেটা পাওয়া যায়নি</p>";
+    });
+}
+
+window.deleteData = async function(id) {
+    if(confirm("আপনি কি এই ডেটাটি ডিলিট করতে চান?")) {
+        await deleteDoc(doc(db, "transactions", id));
+        alert("ডেটা ডিলিট হয়েছে।");
+    }
+}
+
+window.loadOutstanding = function() {
+    const q = query(collection(db, "transactions"), where("uid", "==", auth.currentUser.uid));
+    onSnapshot(q, (snapshot) => {
+        let balances = {};
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            if(!balances[d.name]) balances[d.name] = { given: 0, taken: 0, mobile: d.mobile };
+            if(d.type === 'give') balances[d.name].given += d.amount;
+            if(d.type === 'take') balances[d.name].taken += d.amount;
+        });
+
+        let html = '';
+        for(let name in balances) {
+            const outstanding = balances[name].given - balances[name].taken;
+            const color = outstanding > 0 ? 'red' : 'green';
+            html += `<div class="outstanding-card">
+                <strong>${name}</strong> (${balances[name].mobile})<br>
+                দিয়েছেন: ${balances[name].given} টাকা | পেয়েছেন: ${balances[name].taken} টাকা |<br>
+                <span style="color:${color}; font-weight:bold; font-size:16px;">বকেয়া: ${outstanding} টাকা</span>
+            </div>`;
+        }
+        document.getElementById('outstanding-list').innerHTML = html || "<p>কোন বকেয়া নেই।</p>";
+    });
+}
+</script>
+</body>
+</html>

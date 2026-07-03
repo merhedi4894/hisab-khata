@@ -7,8 +7,8 @@
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; }
         .container { max-width: 500px; margin: auto; background: white; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .header { background-color: #4CAF50; color: white; padding: 15px; text-align: center; font-size: 20px; position: relative; }
-        .nav { display: flex; justify-content: space-around; background: #333; padding: 10px 0; position: sticky; top: 0; z-index: 100; }
+        .header { background-color: #4CAF50; color: white; padding: 15px; text-align: center; font-size: 20px; }
+        .nav { display: flex; justify-content: space-around; background: #333; padding: 10px 0; }
         .nav button { background: none; border: none; color: white; cursor: pointer; font-size: 14px; }
         .nav button.active { color: #4CAF50; font-weight: bold; border-bottom: 2px solid #4CAF50; }
         .section { padding: 20px; display: none; }
@@ -17,7 +17,6 @@
         button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #45a049; }
         .btn-danger { background-color: #f44336; padding: 5px; font-size: 12px; width: auto; }
-        .btn-edit { background-color: #ff9800; padding: 5px; font-size: 12px; width: auto; margin-right: 5px;}
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 13px; }
         th { background-color: #f2f2f2; }
@@ -28,19 +27,17 @@
 <body>
 
 <div class="container">
-    <!-- Auth Section -->
     <div id="auth-section">
         <div class="header">লগইন / সাইন আপ</div>
         <div class="section" style="display:block">
-            <input type="email" id="email" placeholder="ইমেইল">
-            <input type="password" id="password" placeholder="পাসওয়ার্ড">
-            <button onclick="login()">লগইন</button>
-            <button onclick="signup()" style="background:#2196F3">সাইন আপ</button>
+            <input type="email" id="email" placeholder="ইমেইল (যেমন: name@gmail.com)">
+            <input type="password" id="password" placeholder="পাসওয়ার্ড (৬ অক্ষরের বেশি)">
+            <button onclick="signup()">সাইন আপ</button>
+            <button onclick="login()" style="background:#2196F3">লগইন</button>
             <button onclick="resetPassword()" style="background:transparent; color:blue; border:1px solid blue">পাসওয়ার্ড ভুলে গেছি?</button>
         </div>
     </div>
 
-    <!-- Main App Section -->
     <div id="app-section" style="display:none">
         <div class="header">
             হিসাব খাতা 
@@ -90,9 +87,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// ⚠️ এখানে আপনার Firebase এর Config তথ্য বসান
+// ⚠️ এখানে অবশ্যই আপনার Firebase এর আসল Config তথ্য বসাতে হবে
 const firebaseConfig = {
-  apiKey: "AIzaSyAQi-qGSjiLixmDw23MjnbvZEsdiVhfeek",
+  apiKey: "AIzaSyAQi-qGSjiLixmDw23MjnbvZEsdiVhfeek", // এই জায়গায় আপনার কোড বসবে
   authDomain: "due-tracking-app.firebaseapp.com",
   projectId: "due-tracking-app",
   storageBucket: "due-tracking-app.firebasestorage.app",
@@ -119,15 +116,24 @@ onAuthStateChanged(auth, (user) => {
 });
 
 window.login = function() {
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
+    if (!email || !password) return alert("ইমেইল এবং পাসওয়ার্ড দিন।");
+    
     signInWithEmailAndPassword(auth, email, password).catch(e => alert(e.message));
 }
 
 window.signup = function() {
-    const email = document.getElementById('email').value;
+    alert("সাইন আপ প্রক্রিয়া শুরু হচ্ছে..."); // এটি দেখে বুঝবেন বাটন কাজ করছে
+    const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-    createUserWithEmailAndPassword(auth, email, password).catch(e => alert(e.message));
+    
+    if (!email || !password) return alert("ইমেইল এবং পাসওয়ার্ড দিন।");
+    if(password.length < 6) return alert("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।");
+    
+    createUserWithEmailAndPassword(auth, email, password)
+        .then(() => alert("সফলভাবে একাউন্ট তৈরি হয়েছে!"))
+        .catch(e => alert("এরর: " + e.message));
 }
 
 window.resetPassword = function() {
@@ -160,10 +166,6 @@ window.addTransaction = async function(type) {
             amount: parseFloat(amount), uid: auth.currentUser.uid
         });
         alert("সফলভাবে সেভ হয়েছে!");
-        document.getElementById(`${prefix}-date`).value = '';
-        document.getElementById(`${prefix}-name`).value = '';
-        document.getElementById(`${prefix}-mobile`).value = '';
-        document.getElementById(`${prefix}-amount`).value = '';
         loadOutstanding();
     } catch (e) { alert(e.message); }
 }
@@ -195,7 +197,6 @@ window.searchHistory = function() {
 window.deleteData = async function(id) {
     if(confirm("আপনি কি এই ডেটাটি ডিলিট করতে চান?")) {
         await deleteDoc(doc(db, "transactions", id));
-        alert("ডেটা ডিলিট হয়েছে।");
     }
 }
 
@@ -216,7 +217,7 @@ window.loadOutstanding = function() {
             const color = outstanding > 0 ? 'red' : 'green';
             html += `<div class="outstanding-card">
                 <strong>${name}</strong> (${balances[name].mobile})<br>
-                দিয়েছেন: ${balances[name].given} টাকা | পেয়েছেন: ${balances[name].taken} টাকা |<br>
+                দিয়েছেন: ${balances[name].given} | পেয়েছেন: ${balances[name].taken} |<br>
                 <span style="color:${color}; font-weight:bold; font-size:16px;">বকেয়া: ${outstanding} টাকা</span>
             </div>`;
         }

@@ -8,31 +8,26 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f5; color: #333; line-height: 1.5; }
         
-        /* Responsive Container */
         .container { max-width: 900px; margin: 20px auto; background: white; min-height: calc(100vh - 40px); box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 10px; overflow: hidden; }
         
-        /* Header */
         .header { background-color: #4CAF50; color: white; padding: 15px 20px; font-size: 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .logout-btn { background: #f44336; padding: 6px 12px; font-size: 13px; width: auto; border-radius: 5px; }
         
-        /* Navigation */
         .nav { display: flex; background: #333; padding: 0; overflow-x: auto; }
         .nav button { flex: 1; background: none; border: none; color: #aaa; cursor: pointer; font-size: 15px; padding: 15px 10px; text-align: center; white-space: nowrap; transition: 0.3s; border-bottom: 3px solid transparent; }
         .nav button.active { color: #fff; background: #222; border-bottom: 3px solid #4CAF50; font-weight: bold; }
         .nav button:hover { color: #fff; }
         
-        /* Sections */
         .section { padding: 20px; display: none; }
         .section.active { display: block; }
         .section h3 { margin-bottom: 20px; color: #4CAF50; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; }
         
-        /* Forms */
         .form-group { margin-bottom: 15px; }
         input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; transition: border-color 0.3s; }
         input:focus { border-color: #4CAF50; outline: none; }
-        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; padding: 12px; border-radius: 6px; font-size: 15px; font-weight: bold; transition: 0.3s; }
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; padding: 12px; border-radius: 6px; font-size: 15px; font-weight: bold; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         button:hover { background-color: #45a049; }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        button:disabled { background-color: #ccc !important; cursor: not-allowed; }
         .btn-secondary { background: #2196F3; }
         .btn-secondary:hover { background: #1976D2; }
         .btn-warning { background: #ff9800; }
@@ -40,7 +35,10 @@
         .btn-link { background: transparent; color: #2196F3; border: 1px solid #2196F3; }
         .btn-link:hover { background: #f0f8ff; }
         
-        /* Table */
+        /* Spinner CSS */
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border-radius: 6px; border: 1px solid #ddd; }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th, td { border-bottom: 1px solid #ddd; padding: 12px 10px; text-align: left; font-size: 14px; }
@@ -52,13 +50,11 @@
         .btn-edit { background: #ff9800; }
         .btn-edit:hover { background: #e68a00; }
 
-        /* Outstanding Cards */
         .outstanding-card { background: #fff; padding: 15px; margin-bottom: 15px; border-left: 5px solid #f44336; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
         .outstanding-card .info { flex: 1; min-width: 200px; }
         .outstanding-card .amount { font-weight: bold; font-size: 18px; color: #f44336; text-align: right; }
         .total-box { background: #4CAF50; color: white; padding: 15px; border-radius: 6px; text-align: right; font-weight: bold; font-size: 18px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        /* Toast */
         .toast { visibility: hidden; min-width: 250px; width: 90%; max-width: 400px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; font-size: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         .toast.error { background-color: #f44336; }
@@ -66,18 +62,15 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 
-        /* Modal */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
         .modal-content { background-color: #fff; margin: 10% auto; padding: 25px; border-radius: 10px; width: 90%; max-width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
         .close-btn:hover { color: #333; }
 
-        /* Pagination */
         .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
         .pagination button { width: auto; padding: 8px 16px; border-radius: 5px; }
         .page-info { padding: 8px 16px; border: 1px solid #ddd; border-radius: 5px; display: flex; align-items: center; font-size: 14px; color: #555; }
 
-        /* Desktop Grid for Forms */
         @media (min-width: 768px) {
             .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
             .form-grid .full-width { grid-column: span 2; }
@@ -96,15 +89,14 @@
                 <input type="text" id="email" placeholder="ইমেইল বা ইউজারনেম">
                 <input type="password" id="password" placeholder="পাসওয়ার্ড">
                 
-                <!-- লগইন উপরে, সাইন আপ নিচে -->
-                <button onclick="login()" class="btn-secondary" style="margin-bottom: 10px;">লগইন</button>
-                <button id="signup-btn" onclick="signup()">সাইন আপ</button>
+                <button id="login-btn" onclick="login()" class="btn-secondary" style="margin-bottom: 10px;"><span id="login-text">লগইন</span></button>
+                <button id="signup-btn" onclick="signup()"><span id="signup-text">সাইন আপ</span></button>
                 
                 <button onclick="toggleForgotPassword()" class="btn-link" style="margin-top: 15px;">পাসওয়ার্ড ভুলে গেছি?</button>
                 
                 <div id="forgot-section" style="display:none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
                     <input type="email" id="reset-email" placeholder="আপনার রেজিস্টার্ড ইমেইল দিন">
-                    <button onclick="resetPassword()" class="btn-warning">রিকভারি লিংক পাঠান</button>
+                    <button id="reset-btn" onclick="resetPassword()" class="btn-warning"><span id="reset-text">রিকভারি লিংক পাঠান</span></button>
                 </div>
             </div>
         </div>
@@ -124,51 +116,45 @@
             <button id="nav-outstanding" onclick="showSection('outstanding-section', this)">মোট বকেয়া</button>
         </div>
 
-        <!-- Give Section -->
         <div id="give-section" class="section">
             <h3>টাকা দিচ্ছি (ধার দিলাম)</h3>
             <div class="form-grid">
                 <div><label>তারিখ</label><input type="date" id="give-date"></div>
-                <div><label>নাম</label><input type="text" id="give-name" list="names-list" placeholder="নাম লিখুন"></div>
+                <div><label>নাম</label><input type="text" id="give-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('give')"></div>
                 <div><label>মোবাইল নম্বর</label><input type="text" id="give-mobile" placeholder="মোবাইল নম্বর"></div>
                 <div><label>পরিমাণ (টাকা)</label><input type="number" id="give-amount" placeholder="পরিমাণ"></div>
                 <div class="full-width"><button onclick="addTransaction('give')">সেভ করুন</button></div>
             </div>
-            <datalist id="names-list"></datalist>
         </div>
 
-        <!-- Take Section -->
         <div id="take-section" class="section">
             <h3>টাকা নিচ্ছি (পরিশোধ পেলাম)</h3>
             <div class="form-grid">
                 <div><label>তারিখ</label><input type="date" id="take-date"></div>
-                <div><label>নাম</label><input type="text" id="take-name" list="names-list" placeholder="নাম লিখুন"></div>
+                <div><label>নাম</label><input type="text" id="take-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('take')"></div>
                 <div><label>মোবাইল নম্বর</label><input type="text" id="take-mobile" placeholder="মোবাইল নম্বর"></div>
                 <div><label>পরিমাণ (টাকা)</label><input type="number" id="take-amount" placeholder="পরিমাণ"></div>
                 <div class="full-width"><button onclick="addTransaction('take')" class="btn-secondary">সেভ করুন</button></div>
             </div>
         </div>
+        <datalist id="names-list"></datalist>
 
-        <!-- History Section -->
         <div id="history-section" class="section">
             <h3>ইতিহাস</h3>
-            <input type="text" id="search-name" placeholder="নাম লিখে সার্চ করুন" onkeyup="renderHistory()">
-            <div class="table-wrap">
-                <div id="history-table"></div>
-            </div>
+            <input type="text" id="search-name" placeholder="নাম বা মোবাইল নম্বর দিয়ে সার্চ করুন" onkeyup="renderHistory()">
+            <div class="table-wrap"><div id="history-table"></div></div>
             <div class="pagination" id="pagination-controls"></div>
         </div>
 
-        <!-- Outstanding Section -->
         <div id="outstanding-section" class="section">
             <h3>মোট বকেয়া তালিকা</h3>
             <div class="total-box" id="total-outstanding-box">মোট বকেয়া: 0 টাকা</div>
             <div id="outstanding-list"></div>
+            <div class="pagination" id="outstanding-pagination-controls"></div>
         </div>
     </div>
 </div>
 
-<!-- Edit Modal -->
 <div id="edit-modal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeEditModal()">&times;</span>
@@ -186,7 +172,6 @@
     </div>
 </div>
 
-<!-- Toast Notification -->
 <div id="toast" class="toast"></div>
 
 <script type="module">
@@ -212,7 +197,10 @@ window.auth = auth;
 window.db = db;
 
 let allTransactions = [];
+let nameMobileMap = {}; // নাম ও মোবাইল নম্বর ম্যাপ করার জন্য
+let outstandingData = [];
 let currentPage = 1;
+let currentOutstandingPage = 1;
 const itemsPerPage = 8;
 let inactivityTimer;
 
@@ -240,6 +228,15 @@ function setDefaultDates() {
     const takeDate = document.getElementById('take-date');
     if(giveDate) giveDate.value = todayStr;
     if(takeDate) takeDate.value = todayStr;
+}
+
+// নাম লিখলে মোবাইল নম্বর অটো ফিল হবে
+window.autoFillMobile = function(type) {
+    const nameInput = document.getElementById(`${type}-name`).value.trim();
+    const mobileInput = document.getElementById(`${type}-mobile`);
+    if(nameMobileMap[nameInput]) {
+        mobileInput.value = nameMobileMap[nameInput];
+    }
 }
 
 function setupInactivityTimer() {
@@ -282,21 +279,22 @@ window.toggleForgotPassword = function() {
 
 window.signup = async function() {
     const username = document.getElementById('username').value.trim();
-    const email = document.getElementById('email').value.trim();
+    const email = document.getElementById('email').value.trim().toLowerCase(); // lowercase
     const password = document.getElementById('password').value;
     const signupBtn = document.getElementById('signup-btn');
+    const signupText = document.getElementById('signup-text');
     
     if(document.getElementById('username').style.display === 'none') {
         document.getElementById('username').style.display = 'block';
         document.getElementById('email').placeholder = 'ইমেইল (যেমন: name@gmail.com)';
-        signupBtn.innerText = 'সাইন আপ নিশ্চিত করুন';
+        signupText.innerText = 'সাইন আপ নিশ্চিত করুন';
         return;
     }
     
     if (!username || !email || !password) return showToast("সব ঘর পূরণ করুন!", true);
     if(password.length < 6) return showToast("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে!", true);
     
-    signupBtn.innerText = "অপেক্ষা করুন...";
+    signupText.innerHTML = '<div class="spinner"></div> অপেক্ষা করুন...';
     signupBtn.disabled = true;
 
     try {
@@ -304,13 +302,13 @@ window.signup = async function() {
         await addDoc(collection(db, "users"), {
             uid: userCredential.user.uid,
             username: username,
-            email: email
+            email: email // lowercase save
         });
     } catch (e) {
         let err = e.message;
         if(e.code === 'auth/email-already-in-use') err = "এই ইমেইল দিয়ে আগেই সাইন আপ করা হয়েছে!";
         showToast(err, true);
-        signupBtn.innerText = "সাইন আপ নিশ্চিত করুন";
+        signupText.innerText = "সাইন আপ নিশ্চিত করুন";
         signupBtn.disabled = false;
     }
 }
@@ -318,27 +316,51 @@ window.signup = async function() {
 window.login = async function() {
     const identifier = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
+    const loginBtn = document.getElementById('login-btn');
+    const loginText = document.getElementById('login-text');
+    
     if (!identifier || !password) return showToast("ইউজারনেম/ইমেইল এবং পাসওয়ার্ড দিন!", true);
 
-    let emailToLogin = identifier;
+    loginText.innerHTML = '<div class="spinner"></div> অপেক্ষা করুন...';
+    loginBtn.disabled = true;
+
+    let emailToLogin = identifier.toLowerCase();
 
     if(!identifier.includes('@')) {
         try {
             const q = query(collection(db, "users"), where("username", "==", identifier));
             const snapshot = await getDocs(q);
-            if(snapshot.empty) return showToast("ইউজারনেম খুঁজে পাওয়া যায়নি!", true);
+            if(snapshot.empty) {
+                showToast("ইউজারনেম খুঁজে পাওয়া যায়নি!", true);
+                loginText.innerText = "লগইন";
+                loginBtn.disabled = false;
+                return;
+            }
             snapshot.forEach(doc => { emailToLogin = doc.data().email; });
         } catch(e) {
-            return showToast("ডাটাবেস এরর!", true);
+            showToast("ডাটাবেস এরর!", true);
+            loginText.innerText = "লগইন";
+            loginBtn.disabled = false;
+            return;
         }
     }
 
-    signInWithEmailAndPassword(auth, emailToLogin, password).catch(e => showToast("লগইন তথ্য ভুল হয়েছে!", true));
+    signInWithEmailAndPassword(auth, emailToLogin, password).catch(e => {
+        showToast("লগইন তথ্য ভুল হয়েছে!", true);
+        loginText.innerText = "লগইন";
+        loginBtn.disabled = false;
+    });
 }
 
 window.resetPassword = async function() {
-    const email = document.getElementById('reset-email').value.trim();
+    const email = document.getElementById('reset-email').value.trim().toLowerCase(); // lowercase
+    const resetBtn = document.getElementById('reset-btn');
+    const resetText = document.getElementById('reset-text');
+    
     if(!email) return showToast("ইমেইল দিন!", true);
+
+    resetText.innerHTML = '<div class="spinner"></div> অপেক্ষা করুন...';
+    resetBtn.disabled = true;
 
     try {
         const q = query(collection(db, "users"), where("email", "==", email));
@@ -346,12 +368,18 @@ window.resetPassword = async function() {
         
         if(snapshot.empty) {
             showToast("Email not registered", true);
+            resetText.innerText = "রিকভারি লিংক পাঠান";
+            resetBtn.disabled = false;
         } else {
             await sendPasswordResetEmail(auth, email);
             showToast("পাসওয়ার্ড রিকভারি লিংক ইমেইলে পাঠানো হয়েছে!", false);
+            resetText.innerText = "রিকভারি লিংক পাঠান";
+            resetBtn.disabled = false;
         }
     } catch(e) {
         showToast("এরর: " + e.message, true);
+        resetText.innerText = "রিকভারি লিংক পাঠান";
+        resetBtn.disabled = false;
     }
 }
 
@@ -362,10 +390,7 @@ window.showSection = function(id, btn) {
     document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     btn.classList.add('active');
-    
-    if(id === 'give-section' || id === 'take-section') {
-        setDefaultDates();
-    }
+    if(id === 'give-section' || id === 'take-section') setDefaultDates();
 }
 
 window.addTransaction = async function(type) {
@@ -396,7 +421,11 @@ window.loadNames = function() {
     const q = query(collection(db, "transactions"), where("uid", "==", auth.currentUser.uid));
     onSnapshot(q, (snapshot) => {
         let names = new Set();
-        snapshot.forEach(doc => names.add(doc.data().name));
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            names.add(d.name);
+            nameMobileMap[d.name] = d.mobile; // নামের সাথে মোবাইল সেভ করছি
+        });
         let html = '';
         names.forEach(name => html += `<option value="${name}">`);
         document.getElementById('names-list').innerHTML = html;
@@ -417,7 +446,10 @@ window.loadHistory = function() {
 
 window.renderHistory = function() {
     const searchVal = document.getElementById('search-name').value.toLowerCase();
-    const filtered = allTransactions.filter(t => t.name.toLowerCase().includes(searchVal));
+    // নাম অথবা মোবাইল নম্বর দিয়ে সার্চ করার অপশন
+    const filtered = allTransactions.filter(t => 
+        t.name.toLowerCase().includes(searchVal) || (t.mobile && t.mobile.includes(searchVal))
+    );
     
     const totalPages = Math.ceil(filtered.length / itemsPerPage);
     if(currentPage > totalPages) currentPage = 1;
@@ -501,6 +533,8 @@ window.loadOutstanding = function() {
     onSnapshot(q, (snapshot) => {
         let balances = {};
         let totalOutstanding = 0;
+        outstandingData = []; // পেজিনেশনের জন্য আরে ক্লিয়ার
+
         snapshot.forEach(doc => {
             const d = doc.data();
             if(!balances[d.name]) balances[d.name] = { given: 0, taken: 0, mobile: d.mobile };
@@ -508,22 +542,54 @@ window.loadOutstanding = function() {
             if(d.type === 'take') balances[d.name].taken += d.amount;
         });
 
-        let html = '';
         for(let name in balances) {
             const outstanding = balances[name].given - balances[name].taken;
             if(outstanding > 0) totalOutstanding += outstanding;
-            const color = outstanding > 0 ? '#f44336' : '#4CAF50';
+            outstandingData.push({ name, mobile: balances[name].mobile, given: balances[name].given, taken: balances[name].taken, outstanding });
+        }
+
+        document.getElementById('total-outstanding-box').innerText = `মোট বকেয়া: ${totalOutstanding} টাকা`;
+        currentOutstandingPage = 1;
+        renderOutstanding();
+    });
+}
+
+window.renderOutstanding = function() {
+    const totalPages = Math.ceil(outstandingData.length / itemsPerPage);
+    if(currentOutstandingPage > totalPages) currentOutstandingPage = 1;
+    
+    const start = (currentOutstandingPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageItems = outstandingData.slice(start, end);
+
+    let html = '';
+    if(pageItems.length === 0) {
+        html = "<p style='text-align:center; color:#777; margin-top:20px;'>কোন বকেয়া নেই।</p>";
+    } else {
+        pageItems.forEach(item => {
+            const color = item.outstanding > 0 ? '#f44336' : '#4CAF50';
             html += `<div class="outstanding-card">
                 <div class="info">
-                    <strong>${name}</strong> <span style="color:#777; font-size:13px;">(${balances[name].mobile})</span><br>
-                    <span style="font-size:13px; color:#555;">দিয়েছেন: ${balances[name].given} | পেয়েছেন: ${balances[name].taken}</span>
+                    <strong>${item.name}</strong> <span style="color:#777; font-size:13px;">(${item.mobile})</span><br>
+                    <span style="font-size:13px; color:#555;">দিয়েছেন: ${item.given} | পেয়েছেন: ${item.taken}</span>
                 </div>
-                <div class="amount" style="color:${color};">বকেয়া: ${outstanding} ৳</div>
+                <div class="amount" style="color:${color};">বকেয়া: ${item.outstanding} ৳</div>
             </div>`;
-        }
-        document.getElementById('outstanding-list').innerHTML = html || "<p style='text-align:center; color:#777; margin-top:20px;'>কোন বকেয়া নেই।</p>";
-        document.getElementById('total-outstanding-box').innerText = `মোট বকেয়া: ${totalOutstanding} টাকা`;
-    });
+        });
+    }
+    document.getElementById('outstanding-list').innerHTML = html;
+
+    // Pagination Controls for Outstanding
+    let pHtml = '';
+    if(currentOutstandingPage > 1) pHtml += `<button onclick="changeOutstandingPage(${currentOutstandingPage - 1})">পূর্ববর্তী</button>`;
+    pHtml += `<div class="page-info">পেজ ${currentOutstandingPage} / ${totalPages || 1}</div>`;
+    if(currentOutstandingPage < totalPages) pHtml += `<button onclick="changeOutstandingPage(${currentOutstandingPage + 1})">পরবর্তী</button>`;
+    document.getElementById('outstanding-pagination-controls').innerHTML = pHtml;
+}
+
+window.changeOutstandingPage = function(page) {
+    currentOutstandingPage = page;
+    renderOutstanding();
 }
 </script>
 </body>

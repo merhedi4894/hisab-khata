@@ -38,8 +38,8 @@
         .section h3 { margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; font-size: 18px; }
         
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border-radius: 8px; border: 1px solid #ecf0f1; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th, td { border-bottom: 1px solid #ecf0f1; padding: 12px 10px; text-align: left; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; } /* মোবাইল ভিউতে এক লাইনে দেখানোর জন্য min-width বাড়ানো হয়েছে */
+        th, td { border-bottom: 1px solid #ecf0f1; padding: 12px 10px; text-align: left; font-size: 14px; white-space: nowrap; } /* white-space: nowrap যুক্ত করা হয়েছে */
         th { background-color: #f8f9fa; color: #2c3e50; font-weight: 600; position: sticky; top: 0; }
         tr:hover { background-color: #f1f1f1; }
         .btn-sm { padding: 6px 12px; font-size: 12px; width: auto; margin-right: 5px; border-radius: 5px; border: none; cursor: pointer; color: white; font-weight: bold;}
@@ -106,6 +106,7 @@
                 <input type="text" id="su-username" placeholder="ইউজারনেম">
                 <div id="username-status" class="status-text"></div>
                 <input type="email" id="su-email" placeholder="ইমেইল">
+                <div id="email-status" class="status-text"></div> <!-- ইমেইল চেক স্ট্যাটাস -->
                 <input type="text" id="su-mobile" placeholder="মোবাইল নম্বর">
                 <input type="password" id="su-password" placeholder="পাসওয়ার্ড">
                 <button id="signup-btn" onclick="signup()" class="btn-action" style="background-color: #27ae60;"><span id="signup-text">একাউন্ট তৈরি করুন</span></button>
@@ -143,8 +144,8 @@
             <h3>টাকা দিচ্ছি (ধার দিলাম)</h3>
             <div class="form-grid">
                 <div><label>তারিখ</label><input type="date" id="give-date"></div>
-                <div><label>নাম</label><input type="text" id="give-name" list="names-list" placeholder="নাম লিখুন" onchange="autoFillMobile('give')"></div>
-                <div><label>মোবাইল নম্বর</label><input type="text" id="give-mobile" placeholder="মোবাইল নম্বর"></div>
+                <div><label>নাম</label><input type="text" id="give-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('give')"></div>
+                <div><label>মোবাইল নম্বর</label><input type="text" id="give-mobile" list="mobiles-list" placeholder="মোবাইল নম্বর" oninput="autoFillName('give')"></div>
                 <div><label>পরিমাণ (টাকা)</label><input type="number" id="give-amount" placeholder="পরিমাণ"></div>
                 <div class="full-width"><button onclick="addTransaction('give')" class="btn-action">সেভ করুন</button></div>
             </div>
@@ -154,13 +155,14 @@
             <h3>টাকা নিচ্ছি (পরিশোধ পেলাম)</h3>
             <div class="form-grid">
                 <div><label>তারিখ</label><input type="date" id="take-date"></div>
-                <div><label>নাম</label><input type="text" id="take-name" list="names-list" placeholder="নাম লিখুন" onchange="autoFillMobile('take')"></div>
-                <div><label>মোবাইল নম্বর</label><input type="text" id="take-mobile" placeholder="মোবাইল নম্বর"></div>
+                <div><label>নাম</label><input type="text" id="take-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('take')"></div>
+                <div><label>মোবাইল নম্বর</label><input type="text" id="take-mobile" list="mobiles-list" placeholder="মোবাইল নম্বর" oninput="autoFillName('take')"></div>
                 <div><label>পরিমাণ (টাকা)</label><input type="number" id="take-amount" placeholder="পরিমাণ"></div>
                 <div class="full-width"><button onclick="addTransaction('take')" class="btn-action" style="background-color: #3498db;">সেভ করুন</button></div>
             </div>
         </div>
         <datalist id="names-list"></datalist>
+        <datalist id="mobiles-list"></datalist>
 
         <div id="history-section" class="section">
             <h3>ইতিহাস</h3>
@@ -216,7 +218,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ব্রাউজার বা অ্যাপ বন্ধ করলে লগআউট হওয়ার জন্য Session Persistence সেট করা হলো
 setPersistence(auth, browserSessionPersistence);
 
 window.auth = auth;
@@ -224,6 +225,7 @@ window.db = db;
 
 let allTransactions = [];
 let nameMobileMap = {}; 
+let mobileNameMap = {}; // মোবাইল নম্বর থেকে নাম খোঁজার জন্য
 let outstandingData = [];
 let currentPage = 1;
 let currentOutstandingPage = 1;
@@ -264,6 +266,7 @@ function setDefaultDates() {
     if(takeDate) takeDate.value = todayStr;
 }
 
+// নাম লিখলে মোবাইল অটো ফিল হবে
 window.autoFillMobile = function(type) {
     const nameInput = document.getElementById(`${type}-name`).value.trim();
     const mobileInput = document.getElementById(`${type}-mobile`);
@@ -272,7 +275,15 @@ window.autoFillMobile = function(type) {
     }
 }
 
-// লোকাল স্টোরেজ থেকে সাজেশন লোড করার ফাংশন
+// মোবাইল লিখলে নাম অটো ফিল হবে
+window.autoFillName = function(type) {
+    const mobileInput = document.getElementById(`${type}-mobile`).value.trim();
+    const nameInput = document.getElementById(`${type}-name`);
+    if(mobileNameMap[mobileInput]) {
+        nameInput.value = mobileNameMap[mobileInput];
+    }
+}
+
 function loadSavedUsers() {
     const users = JSON.parse(localStorage.getItem('savedUsers') || '[]');
     const datalist = document.getElementById('saved-users');
@@ -280,7 +291,6 @@ function loadSavedUsers() {
 }
 loadSavedUsers();
 
-// ৫ মিনিট নিষ্ক্রিয় থাকলে লগআউট ও পেজ রিলোড
 function setupInactivityTimer() {
     clearTimeout(inactivityTimer);
     if (auth.currentUser) {
@@ -296,7 +306,7 @@ function setupInactivityTimer() {
     document.addEventListener(event, setupInactivityTimer, false);
 });
 
-// রিয়েল-টাইম ইউজারনেম চেক করার লজিক
+// রিয়েল-টাইম ইউজারনেম চেক
 const suUsernameInput = document.getElementById('su-username');
 const usernameStatus = document.getElementById('username-status');
 let checkUserTimeout;
@@ -304,11 +314,7 @@ let checkUserTimeout;
 suUsernameInput.addEventListener('input', () => {
     clearTimeout(checkUserTimeout);
     const username = suUsernameInput.value.trim();
-    
-    if(username.length < 3) {
-        usernameStatus.innerText = '';
-        return;
-    }
+    if(username.length < 3) { usernameStatus.innerText = ''; return; }
     
     checkUserTimeout = setTimeout(async () => {
         try {
@@ -321,9 +327,32 @@ suUsernameInput.addEventListener('input', () => {
                 usernameStatus.innerText = "Username available";
                 usernameStatus.style.color = "green";
             }
-        } catch(e) {
-            usernameStatus.innerText = "";
-        }
+        } catch(e) { usernameStatus.innerText = ""; }
+    }, 500);
+});
+
+// রিয়েল-টাইম ইমেইল চেক
+const suEmailInput = document.getElementById('su-email');
+const emailStatus = document.getElementById('email-status');
+let checkEmailTimeout;
+
+suEmailInput.addEventListener('input', () => {
+    clearTimeout(checkEmailTimeout);
+    const email = suEmailInput.value.trim().toLowerCase();
+    if(email.length < 5 || !email.includes('@')) { emailStatus.innerText = ''; return; }
+    
+    checkEmailTimeout = setTimeout(async () => {
+        try {
+            const q = query(collection(db, "users"), where("email", "==", email));
+            const snapshot = await getDocs(q);
+            if(!snapshot.empty) {
+                emailStatus.innerText = "Already used";
+                emailStatus.style.color = "red";
+            } else {
+                emailStatus.innerText = "Email available";
+                emailStatus.style.color = "green";
+            }
+        } catch(e) { emailStatus.innerText = ""; }
     }, 500);
 });
 
@@ -359,6 +388,7 @@ window.signup = async function() {
     if (!username || !email || !mobile || !password) return showToast("সব ঘর পূরণ করুন!", true);
     if(password.length < 6) return showToast("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে!", true);
     if(usernameStatus.innerText === "Username already exist") return showToast("এই ইউজারনেম ইতিমধ্যে ব্যবহৃত হয়েছে!", true);
+    if(emailStatus.innerText === "Already used") return showToast("এই ইমেইল ইতিমধ্যে ব্যবহৃত হয়েছে!", true);
     
     signupText.innerHTML = '<div class="spinner"></div> অপেক্ষা করুন...';
     signupBtn.disabled = true;
@@ -373,7 +403,7 @@ window.signup = async function() {
         });
     } catch (e) {
         let err = e.message;
-        if(e.code === 'auth/email-already-in-use') err = "এই ইমেইল দিয়ে আগেই সাইন আপ করা হয়েছে!";
+        if(e.code === 'auth/email-already-in-use') err = "Already used";
         showToast(err, true);
         signupText.innerText = "একাউন্ট তৈরি করুন";
         signupBtn.disabled = false;
@@ -413,7 +443,6 @@ window.login = async function() {
     }
 
     signInWithEmailAndPassword(auth, emailToLogin, password).then(() => {
-        // লগইন সফল হলে লোকাল স্টোরেজে ইউজারনেম সেভ করা
         let users = JSON.parse(localStorage.getItem('savedUsers') || '[]');
         if(!users.includes(identifier)) {
             users.push(identifier);
@@ -454,11 +483,8 @@ window.resetPassword = async function() {
     }
 }
 
-// লগআউট হলে পেজ রিফ্রেশ হবে
 window.logout = function() { 
-    signOut(auth).then(() => {
-        window.location.reload();
-    }); 
+    signOut(auth).then(() => { window.location.reload(); }); 
 }
 
 window.showSection = function(id, btn) {
@@ -473,11 +499,21 @@ window.showSection = function(id, btn) {
 window.addTransaction = async function(type) {
     const prefix = type === 'give' ? 'give' : 'take';
     const date = document.getElementById(`${prefix}-date`).value;
-    const name = document.getElementById(`${prefix}-name`).value;
-    const mobile = document.getElementById(`${prefix}-mobile`).value;
+    const name = document.getElementById(`${prefix}-name`).value.trim();
+    const mobile = document.getElementById(`${prefix}-mobile`).value.trim();
     const amount = document.getElementById(`${prefix}-amount`).value;
 
     if(!date || !name || !amount) return showToast("তারিখ, নাম এবং টাকার অংশ বাধ্যতামূলক!", true);
+
+    // একই মোবাইল নম্বর অন্য নামে দেওয়া যাবে না
+    if(mobile) {
+        if(mobileNameMap[mobile] && mobileNameMap[mobile] !== name) {
+            return showToast("এই মোবাইল নম্বরটি অন্য নামে ব্যবহৃত (Already taken)", true);
+        }
+        if(nameMobileMap[name] && nameMobileMap[name] !== mobile) {
+            return showToast("এই নামে অন্য মোবাইল নম্বর ব্যবহৃত হয়েছে (Already taken)", true);
+        }
+    }
 
     try {
         await addDoc(collection(db, "transactions"), {
@@ -498,14 +534,25 @@ window.loadNames = function() {
     const q = query(collection(db, "transactions"), where("uid", "==", auth.currentUser.uid));
     onSnapshot(q, (snapshot) => {
         let names = new Set();
+        let mobiles = new Set();
+        nameMobileMap = {}; 
+        mobileNameMap = {}; 
+        
         snapshot.forEach(doc => {
             const d = doc.data();
             names.add(d.name);
+            mobiles.add(d.mobile);
             nameMobileMap[d.name] = d.mobile; 
+            mobileNameMap[d.mobile] = d.name; 
         });
-        let html = '';
-        names.forEach(name => html += `<option value="${name}">`);
-        document.getElementById('names-list').innerHTML = html;
+        
+        let htmlNames = '';
+        names.forEach(name => htmlNames += `<option value="${name}">`);
+        document.getElementById('names-list').innerHTML = htmlNames;
+        
+        let htmlMobiles = '';
+        mobiles.forEach(mobile => htmlMobiles += `<option value="${mobile}">`);
+        document.getElementById('mobiles-list').innerHTML = htmlMobiles;
     });
 }
 
@@ -539,9 +586,10 @@ window.renderHistory = function() {
         html += `<tr><td colspan="5" style="text-align:center; padding: 20px;">কোন ডেটা পাওয়া যায়নি</td></tr>`;
     } else {
         pageItems.forEach(d => {
+            // বন্ধনী () সরানো হয়েছে
             html += `<tr>
                 <td>${formatDate(d.date)}</td>
-                <td>${d.name} <br><span style="font-size:11px; color:#777;">(${d.mobile})</span></td>
+                <td>${d.name} <br><span style="font-size:11px; color:#777;">${d.mobile}</span></td>
                 <td style="color:#e74c3c; font-weight:bold;">${d.type === 'give' ? d.amount : '-'}</td>
                 <td style="color:#27ae60; font-weight:bold;">${d.type === 'take' ? d.amount : '-'}</td>
                 <td>

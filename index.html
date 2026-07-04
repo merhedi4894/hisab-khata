@@ -26,6 +26,8 @@
         button.btn-action:hover { background-color: #34495e; }
         button:disabled { background-color: #95a5a6 !important; cursor: not-allowed; }
         
+        .status-text { font-size: 13px; margin-top: -10px; margin-bottom: 10px; padding-left: 5px; }
+
         .nav { display: flex; background: #34495e; padding: 0; overflow-x: auto; }
         .nav button { flex: 1; background: none; border: none; color: #bdc3c7; cursor: pointer; font-size: 15px; padding: 15px 10px; text-align: center; white-space: nowrap; transition: 0.3s; border-bottom: 3px solid transparent; }
         .nav button.active { color: #fff; background: #2c3e50; border-bottom: 3px solid #e74c3c; font-weight: bold; }
@@ -74,7 +76,6 @@
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Empty Home Style */
         #empty-home { text-align: center; padding-top: 80px; color: #95a5a6; }
     </style>
 </head>
@@ -94,7 +95,8 @@
 
             <!-- Login View -->
             <div id="login-view" class="auth-view">
-                <input type="text" id="login-identifier" placeholder="ইমেইল বা ইউজারনেম">
+                <input type="text" id="login-identifier" list="saved-users" placeholder="ইমেইল বা ইউজারনেম">
+                <datalist id="saved-users"></datalist>
                 <input type="password" id="login-password" placeholder="পাসওয়ার্ড">
                 <button id="login-btn" onclick="login()" class="btn-action"><span id="login-text">প্রবেশ করুন</span></button>
             </div>
@@ -102,6 +104,7 @@
             <!-- Signup View -->
             <div id="signup-view" class="auth-view" style="display:none;">
                 <input type="text" id="su-username" placeholder="ইউজারনেম">
+                <div id="username-status" class="status-text"></div>
                 <input type="email" id="su-email" placeholder="ইমেইল">
                 <input type="text" id="su-mobile" placeholder="মোবাইল নম্বর">
                 <input type="password" id="su-password" placeholder="পাসওয়ার্ড">
@@ -131,7 +134,6 @@
             <button onclick="showSection('outstanding-section', this)">মোট বকেয়া</button>
         </div>
 
-        <!-- Empty Home (লগইন করার পর ফাকা পেজ দেখাবে) -->
         <div id="empty-home" class="section active">
             <h2>স্বাগতম!</h2>
             <p style="margin-top: 10px;">অনুগ্রহ করে উপরের মেনু থেকে যেকোনো একটি অপশন নির্বাচন করুন।</p>
@@ -197,7 +199,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -213,6 +215,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// ব্রাউজার বা অ্যাপ বন্ধ করলে লগআউট হওয়ার জন্য Session Persistence সেট করা হলো
+setPersistence(auth, browserSessionPersistence);
 
 window.auth = auth;
 window.db = db;
@@ -267,12 +272,22 @@ window.autoFillMobile = function(type) {
     }
 }
 
+// লোকাল স্টোরেজ থেকে সাজেশন লোড করার ফাংশন
+function loadSavedUsers() {
+    const users = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+    const datalist = document.getElementById('saved-users');
+    datalist.innerHTML = users.map(u => `<option value="${u}">`).join('');
+}
+loadSavedUsers();
+
+// ৫ মিনিট নিষ্ক্রিয় থাকলে লগআউট ও পেজ রিলোড
 function setupInactivityTimer() {
     clearTimeout(inactivityTimer);
     if (auth.currentUser) {
         inactivityTimer = setTimeout(() => {
             signOut(auth).then(() => {
                 showToast("৫ মিনিট নিষ্ক্রিয় থাকার কারণে অটো লগআউট হয়েছে।", true);
+                setTimeout(() => window.location.reload(), 2000);
             });
         }, 300000); 
     }
@@ -281,12 +296,42 @@ function setupInactivityTimer() {
     document.addEventListener(event, setupInactivityTimer, false);
 });
 
+// রিয়েল-টাইম ইউজারনেম চেক করার লজিক
+const suUsernameInput = document.getElementById('su-username');
+const usernameStatus = document.getElementById('username-status');
+let checkUserTimeout;
+
+suUsernameInput.addEventListener('input', () => {
+    clearTimeout(checkUserTimeout);
+    const username = suUsernameInput.value.trim();
+    
+    if(username.length < 3) {
+        usernameStatus.innerText = '';
+        return;
+    }
+    
+    checkUserTimeout = setTimeout(async () => {
+        try {
+            const q = query(collection(db, "users"), where("username", "==", username));
+            const snapshot = await getDocs(q);
+            if(!snapshot.empty) {
+                usernameStatus.innerText = "Username already exist";
+                usernameStatus.style.color = "red";
+            } else {
+                usernameStatus.innerText = "Username available";
+                usernameStatus.style.color = "green";
+            }
+        } catch(e) {
+            usernameStatus.innerText = "";
+        }
+    }, 500);
+});
+
 onAuthStateChanged(auth, (user) => {
     if (user) {
         document.getElementById('auth-section').style.display = 'none';
         document.getElementById('app-section').style.display = 'flex';
         
-        // লগইন করার পর সব সেকশন হাইড করে শুধু ফাকা হোম পেজ দেখানো হচ্ছে
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
         document.getElementById('empty-home').classList.add('active');
@@ -313,20 +358,12 @@ window.signup = async function() {
     
     if (!username || !email || !mobile || !password) return showToast("সব ঘর পূরণ করুন!", true);
     if(password.length < 6) return showToast("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে!", true);
+    if(usernameStatus.innerText === "Username already exist") return showToast("এই ইউজারনেম ইতিমধ্যে ব্যবহৃত হয়েছে!", true);
     
     signupText.innerHTML = '<div class="spinner"></div> অপেক্ষা করুন...';
     signupBtn.disabled = true;
 
     try {
-        const q = query(collection(db, "users"), where("username", "==", username));
-        const snapshot = await getDocs(q);
-        if(!snapshot.empty) {
-            showToast("Already exist", true);
-            signupText.innerText = "একাউন্ট তৈরি করুন";
-            signupBtn.disabled = false;
-            return;
-        }
-
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await addDoc(collection(db, "users"), {
             uid: userCredential.user.uid,
@@ -336,7 +373,7 @@ window.signup = async function() {
         });
     } catch (e) {
         let err = e.message;
-        if(e.code === 'auth/email-already-in-use') err = "Already exist";
+        if(e.code === 'auth/email-already-in-use') err = "এই ইমেইল দিয়ে আগেই সাইন আপ করা হয়েছে!";
         showToast(err, true);
         signupText.innerText = "একাউন্ট তৈরি করুন";
         signupBtn.disabled = false;
@@ -375,7 +412,14 @@ window.login = async function() {
         }
     }
 
-    signInWithEmailAndPassword(auth, emailToLogin, password).catch(e => {
+    signInWithEmailAndPassword(auth, emailToLogin, password).then(() => {
+        // লগইন সফল হলে লোকাল স্টোরেজে ইউজারনেম সেভ করা
+        let users = JSON.parse(localStorage.getItem('savedUsers') || '[]');
+        if(!users.includes(identifier)) {
+            users.push(identifier);
+            localStorage.setItem('savedUsers', JSON.stringify(users));
+        }
+    }).catch(e => {
         showToast("লগইন তথ্য ভুল হয়েছে!", true);
         loginText.innerText = "প্রবেশ করুন";
         loginBtn.disabled = false;
@@ -410,10 +454,14 @@ window.resetPassword = async function() {
     }
 }
 
-window.logout = function() { signOut(auth); }
+// লগআউট হলে পেজ রিফ্রেশ হবে
+window.logout = function() { 
+    signOut(auth).then(() => {
+        window.location.reload();
+    }); 
+}
 
 window.showSection = function(id, btn) {
-    // ট্যাবে ক্লিক করলে ফাকা হোম পেজ সহ অন্যান্য সেকশন হাইড হবে
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
     

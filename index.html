@@ -38,8 +38,8 @@
         .section h3 { margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; font-size: 18px; }
         
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border-radius: 8px; border: 1px solid #ecf0f1; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; } /* মোবাইল ভিউতে এক লাইনে দেখানোর জন্য min-width বাড়ানো হয়েছে */
-        th, td { border-bottom: 1px solid #ecf0f1; padding: 12px 10px; text-align: left; font-size: 14px; white-space: nowrap; } /* white-space: nowrap যুক্ত করা হয়েছে */
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { border-bottom: 1px solid #ecf0f1; padding: 12px 10px; text-align: left; font-size: 14px; }
         th { background-color: #f8f9fa; color: #2c3e50; font-weight: 600; position: sticky; top: 0; }
         tr:hover { background-color: #f1f1f1; }
         .btn-sm { padding: 6px 12px; font-size: 12px; width: auto; margin-right: 5px; border-radius: 5px; border: none; cursor: pointer; color: white; font-weight: bold;}
@@ -71,6 +71,18 @@
         @media (min-width: 768px) {
             .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
             .form-grid .full-width { grid-column: span 2; }
+        }
+        
+        /* মোবাইল ভিউতে টেবিলের বদলে কার্ড আকারে দেখানোর জন্য স্টাইল */
+        @media (max-width: 600px) {
+            .table-wrap { border: none; overflow-x: hidden; }
+            table { min-width: 100%; border: none; }
+            thead { display: none; } /* হেডার লুকানো হয়েছে */
+            tr { display: block; margin-bottom: 15px; border: 1px solid #ecf0f1; border-radius: 8px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+            td { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 15px; font-size: 14px; text-align: right; }
+            td:last-child { border-bottom: none; }
+            td::before { content: attr(data-label); font-weight: bold; color: #2c3e50; text-align: left; width: 40%; }
+            tr:hover { background-color: #fff; }
         }
         
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
@@ -106,7 +118,7 @@
                 <input type="text" id="su-username" placeholder="ইউজারনেম">
                 <div id="username-status" class="status-text"></div>
                 <input type="email" id="su-email" placeholder="ইমেইল">
-                <div id="email-status" class="status-text"></div> <!-- ইমেইল চেক স্ট্যাটাস -->
+                <div id="email-status" class="status-text"></div>
                 <input type="text" id="su-mobile" placeholder="মোবাইল নম্বর">
                 <input type="password" id="su-password" placeholder="পাসওয়ার্ড">
                 <button id="signup-btn" onclick="signup()" class="btn-action" style="background-color: #27ae60;"><span id="signup-text">একাউন্ট তৈরি করুন</span></button>
@@ -225,7 +237,7 @@ window.db = db;
 
 let allTransactions = [];
 let nameMobileMap = {}; 
-let mobileNameMap = {}; // মোবাইল নম্বর থেকে নাম খোঁজার জন্য
+let mobileNameMap = {}; 
 let outstandingData = [];
 let currentPage = 1;
 let currentOutstandingPage = 1;
@@ -266,7 +278,6 @@ function setDefaultDates() {
     if(takeDate) takeDate.value = todayStr;
 }
 
-// নাম লিখলে মোবাইল অটো ফিল হবে
 window.autoFillMobile = function(type) {
     const nameInput = document.getElementById(`${type}-name`).value.trim();
     const mobileInput = document.getElementById(`${type}-mobile`);
@@ -275,7 +286,6 @@ window.autoFillMobile = function(type) {
     }
 }
 
-// মোবাইল লিখলে নাম অটো ফিল হবে
 window.autoFillName = function(type) {
     const mobileInput = document.getElementById(`${type}-mobile`).value.trim();
     const nameInput = document.getElementById(`${type}-name`);
@@ -306,7 +316,6 @@ function setupInactivityTimer() {
     document.addEventListener(event, setupInactivityTimer, false);
 });
 
-// রিয়েল-টাইম ইউজারনেম চেক
 const suUsernameInput = document.getElementById('su-username');
 const usernameStatus = document.getElementById('username-status');
 let checkUserTimeout;
@@ -331,7 +340,6 @@ suUsernameInput.addEventListener('input', () => {
     }, 500);
 });
 
-// রিয়েল-টাইম ইমেইল চেক
 const suEmailInput = document.getElementById('su-email');
 const emailStatus = document.getElementById('email-status');
 let checkEmailTimeout;
@@ -505,7 +513,6 @@ window.addTransaction = async function(type) {
 
     if(!date || !name || !amount) return showToast("তারিখ, নাম এবং টাকার অংশ বাধ্যতামূলক!", true);
 
-    // একই মোবাইল নম্বর অন্য নামে দেওয়া যাবে না
     if(mobile) {
         if(mobileNameMap[mobile] && mobileNameMap[mobile] !== name) {
             return showToast("এই মোবাইল নম্বরটি অন্য নামে ব্যবহৃত (Already taken)", true);
@@ -581,25 +588,25 @@ window.renderHistory = function() {
     const end = start + itemsPerPage;
     const pageItems = filtered.slice(start, end);
 
-    let html = `<table><tr><th>তারিখ</th><th>নাম</th><th>দিলাম</th><th>পেলাম</th><th>অ্যাকশন</th></tr>`;
+    let html = `<table><thead><tr><th>তারিখ</th><th>নাম</th><th>দিলাম</th><th>পেলাম</th><th>অ্যাকশন</th></tr></thead><tbody>`;
     if(pageItems.length === 0) {
         html += `<tr><td colspan="5" style="text-align:center; padding: 20px;">কোন ডেটা পাওয়া যায়নি</td></tr>`;
     } else {
         pageItems.forEach(d => {
-            // বন্ধনী () সরানো হয়েছে
+            // মোবাইল ভিউতে কার্ড আকারে দেখানোর জন্য data-label যুক্ত করা হয়েছে
             html += `<tr>
-                <td>${formatDate(d.date)}</td>
-                <td>${d.name} <br><span style="font-size:11px; color:#777;">${d.mobile}</span></td>
-                <td style="color:#e74c3c; font-weight:bold;">${d.type === 'give' ? d.amount : '-'}</td>
-                <td style="color:#27ae60; font-weight:bold;">${d.type === 'take' ? d.amount : '-'}</td>
-                <td>
+                <td data-label="তারিখ">${formatDate(d.date)}</td>
+                <td data-label="নাম">${d.name}<br><span style="font-size:12px; color:#777;">${d.mobile}</span></td>
+                <td data-label="দিলাম" style="color:#e74c3c; font-weight:bold;">${d.type === 'give' ? d.amount : '-'}</td>
+                <td data-label="পেলাম" style="color:#27ae60; font-weight:bold;">${d.type === 'take' ? d.amount : '-'}</td>
+                <td data-label="অ্যাকশন">
                     <button class="btn-sm bg-orange" onclick="openEditModal('${d.id}')">এডিট</button>
                     <button class="btn-sm bg-red" onclick="deleteData('${d.id}')">ডিলিট</button>
                 </td>
             </tr>`;
         });
     }
-    html += `</table>`;
+    html += `</tbody></table>`;
     document.getElementById('history-table').innerHTML = html;
 
     let pHtml = '';
@@ -694,7 +701,7 @@ window.renderOutstanding = function() {
             const color = item.outstanding > 0 ? '#e74c3c' : '#27ae60';
             html += `<div class="outstanding-card">
                 <div class="info">
-                    <strong>${item.name}</strong> <span style="color:#777; font-size:13px;">(${item.mobile})</span><br>
+                    <strong>${item.name}</strong> <span style="color:#777; font-size:13px;">${item.mobile}</span><br>
                     <span style="font-size:13px; color:#555;">দিয়েছেন: ${item.given} | পেয়েছেন: ${item.taken}</span>
                 </div>
                 <div class="amount" style="color:${color};">বকেয়া: ${item.outstanding} ৳</div>

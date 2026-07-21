@@ -47,11 +47,11 @@
         .bg-orange { background: #f39c12; }
         .bg-blue { background: #3498db; }
 
-        /* কার্ডগুলো চিকন করার জন্য স্টাইল পরিবর্তন করা হয়েছে */
-        .outstanding-card { background: #fff; padding: 10px 15px; margin-bottom: 8px; border-left: 4px solid #e74c3c; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border: 1px solid #eee; border-left: 4px solid #e74c3c; }
+        /* কার্ডগুলো আরও চিকন করার জন্য স্টাইল পরিবর্তন করা হয়েছে */
+        .outstanding-card { background: #fff; padding: 8px 12px; margin-bottom: 5px; border-left: 4px solid #e74c3c; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; border-left: 4px solid #e74c3c; }
         .outstanding-card .info { flex: 1; min-width: 150px; }
-        .outstanding-card .amount { font-weight: bold; font-size: 16px; color: #e74c3c; text-align: right; }
-        .total-box { background: #2c3e50; color: white; padding: 12px 15px; border-radius: 6px; text-align: right; font-weight: bold; font-size: 16px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .outstanding-card .amount { font-weight: bold; font-size: 14px; color: #e74c3c; text-align: right; }
+        .total-box { background: #2c3e50; color: white; padding: 10px 15px; border-radius: 5px; text-align: right; font-weight: bold; font-size: 15px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         .toast { visibility: hidden; min-width: 250px; width: 90%; max-width: 400px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; font-size: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
@@ -521,7 +521,8 @@ window.addTransaction = async function(type) {
     try {
         await addDoc(collection(db, "transactions"), {
             type: type, date: date, name: name, mobile: mobile,
-            amount: parseFloat(amount), uid: auth.currentUser.uid
+            amount: parseFloat(amount), uid: auth.currentUser.uid,
+            createdAt: new Date().toISOString() // সময় সেভ করার জন্য Timestamp যুক্ত করা হলো
         });
         showToast("সফলভাবে সেভ হয়েছে!", false);
         document.getElementById(`${prefix}-name`).value = '';
@@ -576,12 +577,20 @@ window.renderHistory = function() {
         t.name.toLowerCase().includes(searchVal) || (t.mobile && t.mobile.includes(searchVal))
     );
     
-    // সার্চ করলে তারিখ অনুযায়ী ক্রমান্বয়ে (পুরোনো থেকে নতুন)
+    // সার্চ করলে তারিখ ও সময় অনুযায়ী ক্রমান্বয়ে (পুরোনো থেকে নতুন)
     if(searchVal) {
-        filtered.sort((a, b) => a.date.localeCompare(b.date));
+        filtered.sort((a, b) => {
+            let timeA = a.createdAt || a.date; // পুরোনো ডেটার জন্য ফলব্যাক
+            let timeB = b.createdAt || b.date;
+            return timeA.localeCompare(timeB);
+        });
     } else {
-        // সাধারণ অবস্থায় সাম্প্রতিক তারিখ উপরে (নতুন থেকে পুরোনো)
-        filtered.sort((a, b) => b.date.localeCompare(a.date));
+        // সাধারণ অবস্থায় সাম্প্রতিক তারিখ ও সময় উপরে (নতুন থেকে পুরোনো)
+        filtered.sort((a, b) => {
+            let timeA = a.createdAt || (a.date + 'T23:59:59'); 
+            let timeB = b.createdAt || (b.date + 'T23:59:59');
+            return timeB.localeCompare(timeA);
+        });
     }
     
     const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -681,7 +690,6 @@ window.loadOutstanding = function() {
         for(let name in balances) {
             const outstanding = balances[name].given - balances[name].taken;
             
-            // যাদের বকেয়া ০ তাদের ডাটাবেজ থেকে ডিলিট করার জন্য আলাদা করে রাখা হলো
             if(outstanding === 0) {
                 usersToDelete.push(...balances[name].ids);
             } else {
@@ -690,7 +698,6 @@ window.loadOutstanding = function() {
             }
         }
 
-        // ০ বকেয়া থাকলে স্থায়ীভাবে ডাটাবেজ থেকে ডিলিট করে দেওয়া হবে
         if(usersToDelete.length > 0) {
             usersToDelete.forEach(async (id) => {
                 await deleteDoc(doc(db, "transactions", id));
@@ -719,8 +726,8 @@ window.renderOutstanding = function() {
             const color = item.outstanding > 0 ? '#e74c3c' : '#27ae60';
             html += `<div class="outstanding-card">
                 <div class="info">
-                    <strong>${item.name}</strong> <span style="color:#777; font-size:12px;">${item.mobile}</span><br>
-                    <span style="font-size:12px; color:#555;">দিয়েছেন: ${item.given} | পেয়েছেন: ${item.taken}</span>
+                    <strong>${item.name}</strong> <span style="color:#777; font-size:11px;">${item.mobile ? item.mobile : ''}</span><br>
+                    <span style="font-size:11px; color:#555;">দিয়েছেন: ${item.given} | পেয়েছেন: ${item.taken}</span>
                 </div>
                 <div class="amount" style="color:${color};">বকেয়া: ${item.outstanding} ৳</div>
             </div>`;

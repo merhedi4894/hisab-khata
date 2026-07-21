@@ -47,10 +47,11 @@
         .bg-orange { background: #f39c12; }
         .bg-blue { background: #3498db; }
 
-        .outstanding-card { background: #fff; padding: 15px; margin-bottom: 15px; border-left: 5px solid #e74c3c; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border: 1px solid #eee; border-left: 5px solid #e74c3c; }
-        .outstanding-card .info { flex: 1; min-width: 200px; }
-        .outstanding-card .amount { font-weight: bold; font-size: 18px; color: #e74c3c; text-align: right; }
-        .total-box { background: #2c3e50; color: white; padding: 15px; border-radius: 8px; text-align: right; font-weight: bold; font-size: 18px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* কার্ডগুলো চিকন করার জন্য স্টাইল পরিবর্তন করা হয়েছে */
+        .outstanding-card { background: #fff; padding: 10px 15px; margin-bottom: 8px; border-left: 4px solid #e74c3c; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border: 1px solid #eee; border-left: 4px solid #e74c3c; }
+        .outstanding-card .info { flex: 1; min-width: 150px; }
+        .outstanding-card .amount { font-weight: bold; font-size: 16px; color: #e74c3c; text-align: right; }
+        .total-box { background: #2c3e50; color: white; padding: 12px 15px; border-radius: 6px; text-align: right; font-weight: bold; font-size: 16px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         .toast { visibility: hidden; min-width: 250px; width: 90%; max-width: 400px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; font-size: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
@@ -73,7 +74,6 @@
             .form-grid .full-width { grid-column: span 2; }
         }
         
-        /* মোবাইল ভিউতে স্ক্রল না করে এক স্ক্রিনে দেখানোর জন্য টেবিল ছোট করা হলো */
         @media (max-width: 600px) {
             .section { padding: 15px; }
             .table-wrap { overflow-x: hidden; }
@@ -566,16 +566,23 @@ window.loadHistory = function() {
         snapshot.forEach(doc => {
             allTransactions.push({ id: doc.id, ...doc.data() });
         });
-        allTransactions.sort((a, b) => b.date.localeCompare(a.date)); 
         renderHistory();
     });
 }
 
 window.renderHistory = function() {
     const searchVal = document.getElementById('search-name').value.toLowerCase();
-    const filtered = allTransactions.filter(t => 
+    let filtered = allTransactions.filter(t => 
         t.name.toLowerCase().includes(searchVal) || (t.mobile && t.mobile.includes(searchVal))
     );
+    
+    // সার্চ করলে তারিখ অনুযায়ী ক্রমান্বয়ে (পুরোনো থেকে নতুন)
+    if(searchVal) {
+        filtered.sort((a, b) => a.date.localeCompare(b.date));
+    } else {
+        // সাধারণ অবস্থায় সাম্প্রতিক তারিখ উপরে (নতুন থেকে পুরোনো)
+        filtered.sort((a, b) => b.date.localeCompare(a.date));
+    }
     
     const totalPages = Math.ceil(filtered.length / itemsPerPage);
     if(currentPage > totalPages) currentPage = 1;
@@ -589,7 +596,6 @@ window.renderHistory = function() {
         html += `<tr><td colspan="5" style="text-align:center; padding: 20px;">কোন ডেটা পাওয়া যায়নি</td></tr>`;
     } else {
         pageItems.forEach(d => {
-            // আইকন ব্যবহার করে বাটন ছোট করা হয়েছে
             html += `<tr>
                 <td>${formatDate(d.date)}</td>
                 <td>${d.name}<br><span style="font-size:10px; color:#777;">${d.mobile}</span></td>
@@ -664,15 +670,31 @@ window.loadOutstanding = function() {
 
         snapshot.forEach(doc => {
             const d = doc.data();
-            if(!balances[d.name]) balances[d.name] = { given: 0, taken: 0, mobile: d.mobile };
+            if(!balances[d.name]) balances[d.name] = { given: 0, taken: 0, mobile: d.mobile, ids: [] };
+            balances[d.name].ids.push(doc.id);
             if(d.type === 'give') balances[d.name].given += d.amount;
             if(d.type === 'take') balances[d.name].taken += d.amount;
         });
 
+        let usersToDelete = [];
+
         for(let name in balances) {
             const outstanding = balances[name].given - balances[name].taken;
-            if(outstanding > 0) totalOutstanding += outstanding;
-            outstandingData.push({ name, mobile: balances[name].mobile, given: balances[name].given, taken: balances[name].taken, outstanding });
+            
+            // যাদের বকেয়া ০ তাদের ডাটাবেজ থেকে ডিলিট করার জন্য আলাদা করে রাখা হলো
+            if(outstanding === 0) {
+                usersToDelete.push(...balances[name].ids);
+            } else {
+                if(outstanding > 0) totalOutstanding += outstanding;
+                outstandingData.push({ name, mobile: balances[name].mobile, given: balances[name].given, taken: balances[name].taken, outstanding });
+            }
+        }
+
+        // ০ বকেয়া থাকলে স্থায়ীভাবে ডাটাবেজ থেকে ডিলিট করে দেওয়া হবে
+        if(usersToDelete.length > 0) {
+            usersToDelete.forEach(async (id) => {
+                await deleteDoc(doc(db, "transactions", id));
+            });
         }
 
         document.getElementById('total-outstanding-box').innerText = `মোট বকেয়া: ${totalOutstanding} টাকা`;
@@ -697,8 +719,8 @@ window.renderOutstanding = function() {
             const color = item.outstanding > 0 ? '#e74c3c' : '#27ae60';
             html += `<div class="outstanding-card">
                 <div class="info">
-                    <strong>${item.name}</strong> <span style="color:#777; font-size:13px;">${item.mobile}</span><br>
-                    <span style="font-size:13px; color:#555;">দিয়েছেন: ${item.given} | পেয়েছেন: ${item.taken}</span>
+                    <strong>${item.name}</strong> <span style="color:#777; font-size:12px;">${item.mobile}</span><br>
+                    <span style="font-size:12px; color:#555;">দিয়েছেন: ${item.given} | পেয়েছেন: ${item.taken}</span>
                 </div>
                 <div class="amount" style="color:${color};">বকেয়া: ${item.outstanding} ৳</div>
             </div>`;

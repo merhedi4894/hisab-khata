@@ -73,12 +73,18 @@
             .form-grid .full-width { grid-column: span 2; }
         }
         
-        /* মোবাইল ভিউতে স্ক্রল না করে এক স্ক্রিনে দেখানোর জন্য */
+        /* মোবাইল ভিউতে স্ক্রল না করে এক স্ক্রিনে দেখানোর জন্য নতুন স্টাইল */
         @media (max-width: 600px) {
-            .section { padding: 15px; }
+            .section { padding: 10px; }
             .table-wrap { overflow-x: hidden; }
-            th, td { padding: 8px 4px; font-size: 11px; white-space: nowrap; }
-            .btn-sm { padding: 4px 6px; font-size: 12px; margin-right: 0; }
+            table { table-layout: fixed; width: 100%; } /* টেবিলের প্রস্থ স্ক্রিনের মধ্যে সীমাবদ্ধ করা হলো */
+            th, td { padding: 5px 2px; font-size: 10px; line-height: 1.3; vertical-align: middle; }
+            th:nth-child(1), td:nth-child(1) { width: 28%; white-space: normal; word-break: break-word; } /* তারিখ */
+            th:nth-child(2), td:nth-child(2) { width: 25%; white-space: normal; word-break: break-word; } /* নাম */
+            th:nth-child(3), td:nth-child(3) { width: 15%; text-align: center; } /* দিলাম */
+            th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; } /* পেলাম */
+            th:nth-child(5), td:nth-child(5) { width: 17%; text-align: right; white-space: nowrap; } /* অ্যাকশন */
+            .btn-sm { padding: 3px 5px; font-size: 11px; margin: 0; }
         }
         
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
@@ -255,7 +261,7 @@ window.showAuthView = function(view) {
     document.getElementById(`btn-${view}`).classList.add('active');
 }
 
-// তারিখ এবং বাংলাদেশ সময় ফরম্যাট করার ফাংশন
+// তারিখ এবং বাংলাদেশ সময় ফরম্যাট করার ফাংশন (বছর ২ অক্ষরে দেখানো হবে যাতে জায়গা কম নেয়)
 function formatDateTime(isoString, dateStr) {
     if(isoString) {
         try {
@@ -264,16 +270,16 @@ function formatDateTime(isoString, dateStr) {
                 timeZone: 'Asia/Dhaka', 
                 day: '2-digit', 
                 month: '2-digit', 
-                year: 'numeric', 
+                year: '2-digit', 
                 hour: '2-digit', 
                 minute: '2-digit', 
                 hour12: true 
-            });
+            }).replace(',', '');
         } catch(e) {}
     }
     if(!dateStr) return "";
     const parts = dateStr.split('-');
-    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    return `${parts[2]}-${parts[1]}-${parts[0].slice(2)}`;
 }
 
 function setDefaultDates() {
@@ -537,7 +543,7 @@ window.addTransaction = async function(type) {
         await addDoc(collection(db, "transactions"), {
             type: type, date: date, name: name, mobile: mobile,
             amount: parseFloat(amount), uid: auth.currentUser.uid,
-            createdAt: new Date().toISOString() // সময় সেভ করা হচ্ছে
+            createdAt: new Date().toISOString()
         });
         showToast("সফলভাবে সেভ হয়েছে!", false);
         document.getElementById(`${prefix}-name`).value = '';
@@ -701,7 +707,6 @@ window.loadOutstanding = function() {
 
         for(let name in balances) {
             const outstanding = balances[name].given - balances[name].taken;
-            // বকেয়া ০ হলে ডাটাবেস থেকে ডিলিট করা হবে না, শুধু লিস্ট থেকে সরানো হবে
             if(outstanding > 0) {
                 totalOutstanding += outstanding;
                 outstandingData.push({ name, mobile: balances[name].mobile, given: balances[name].given, taken: balances[name].taken, outstanding });

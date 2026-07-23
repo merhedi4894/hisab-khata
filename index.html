@@ -261,7 +261,7 @@ window.showAuthView = function(view) {
     document.getElementById(`btn-${view}`).classList.add('active');
 }
 
-// তারিখ এবং বাংলাদেশ সময় ফরম্যাট করার ফাংশন (বছর ২ অক্ষরে দেখানো হবে যাতে জায়গা কম নেয়)
+// তারিখ এবং বাংলাদেশ সময় ফরম্যাট করার ফাংশন (বছর ৪ অক্ষরে - YYYY)
 function formatDateTime(isoString, dateStr) {
     if(isoString) {
         try {
@@ -270,7 +270,7 @@ function formatDateTime(isoString, dateStr) {
                 timeZone: 'Asia/Dhaka', 
                 day: '2-digit', 
                 month: '2-digit', 
-                year: '2-digit', 
+                year: 'numeric', // YYYY ফরম্যাটের জন্য numeric ব্যবহার করা হয়েছে
                 hour: '2-digit', 
                 minute: '2-digit', 
                 hour12: true 
@@ -279,7 +279,7 @@ function formatDateTime(isoString, dateStr) {
     }
     if(!dateStr) return "";
     const parts = dateStr.split('-');
-    return `${parts[2]}-${parts[1]}-${parts[0].slice(2)}`;
+    return `${parts[2]}-${parts[1]}-${parts[0]}`; // পুরোনো ডেটার জন্য YYYY
 }
 
 function setDefaultDates() {

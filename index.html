@@ -47,7 +47,6 @@
         .bg-orange { background: #f39c12; }
         .bg-blue { background: #3498db; }
 
-        /* কার্ডগুলো আরও চিকন করার জন্য স্টাইল পরিবর্তন করা হয়েছে */
         .outstanding-card { background: #fff; padding: 8px 12px; margin-bottom: 5px; border-left: 4px solid #e74c3c; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; border-left: 4px solid #e74c3c; }
         .outstanding-card .info { flex: 1; min-width: 150px; }
         .outstanding-card .amount { font-weight: bold; font-size: 14px; color: #e74c3c; text-align: right; }
@@ -74,10 +73,11 @@
             .form-grid .full-width { grid-column: span 2; }
         }
         
+        /* মোবাইল ভিউতে স্ক্রল না করে এক স্ক্রিনে দেখানোর জন্য */
         @media (max-width: 600px) {
             .section { padding: 15px; }
             .table-wrap { overflow-x: hidden; }
-            th, td { padding: 8px 4px; font-size: 12px; white-space: nowrap; }
+            th, td { padding: 8px 4px; font-size: 11px; white-space: nowrap; }
             .btn-sm { padding: 4px 6px; font-size: 12px; margin-right: 0; }
         }
         
@@ -255,7 +255,22 @@ window.showAuthView = function(view) {
     document.getElementById(`btn-${view}`).classList.add('active');
 }
 
-function formatDate(dateStr) {
+// তারিখ এবং বাংলাদেশ সময় ফরম্যাট করার ফাংশন
+function formatDateTime(isoString, dateStr) {
+    if(isoString) {
+        try {
+            let date = new Date(isoString);
+            return date.toLocaleString('en-GB', { 
+                timeZone: 'Asia/Dhaka', 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: true 
+            });
+        } catch(e) {}
+    }
     if(!dateStr) return "";
     const parts = dateStr.split('-');
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -522,7 +537,7 @@ window.addTransaction = async function(type) {
         await addDoc(collection(db, "transactions"), {
             type: type, date: date, name: name, mobile: mobile,
             amount: parseFloat(amount), uid: auth.currentUser.uid,
-            createdAt: new Date().toISOString() // সময় সেভ করার জন্য Timestamp যুক্ত করা হলো
+            createdAt: new Date().toISOString() // সময় সেভ করা হচ্ছে
         });
         showToast("সফলভাবে সেভ হয়েছে!", false);
         document.getElementById(`${prefix}-name`).value = '';
@@ -577,17 +592,17 @@ window.renderHistory = function() {
         t.name.toLowerCase().includes(searchVal) || (t.mobile && t.mobile.includes(searchVal))
     );
     
-    // সার্চ করলে তারিখ ও সময় অনুযায়ী ক্রমান্বয়ে (পুরোনো থেকে নতুন)
+    // সার্চ করলে পূর্বের সময়ের লেনদেন উপরে (পুরোনো থেকে নতুন)
     if(searchVal) {
         filtered.sort((a, b) => {
-            let timeA = a.createdAt || a.date; // পুরোনো ডেটার জন্য ফলব্যাক
-            let timeB = b.createdAt || b.date;
+            let timeA = a.createdAt || (a.date + 'T00:00:00');
+            let timeB = b.createdAt || (b.date + 'T00:00:00');
             return timeA.localeCompare(timeB);
         });
     } else {
-        // সাধারণ অবস্থায় সাম্প্রতিক তারিখ ও সময় উপরে (নতুন থেকে পুরোনো)
+        // সাধারণ অবস্থায় সাম্প্রতিক সময়ের লেনদেন উপরে (নতুন থেকে পুরোনো)
         filtered.sort((a, b) => {
-            let timeA = a.createdAt || (a.date + 'T23:59:59'); 
+            let timeA = a.createdAt || (a.date + 'T23:59:59');
             let timeB = b.createdAt || (b.date + 'T23:59:59');
             return timeB.localeCompare(timeA);
         });
@@ -600,13 +615,13 @@ window.renderHistory = function() {
     const end = start + itemsPerPage;
     const pageItems = filtered.slice(start, end);
 
-    let html = `<table><thead><tr><th>তারিখ</th><th>নাম</th><th>দিলাম</th><th>পেলাম</th><th>অ্যাকশন</th></tr></thead><tbody>`;
+    let html = `<table><thead><tr><th>তারিখ ও সময়</th><th>নাম</th><th>দিলাম</th><th>পেলাম</th><th>অ্যাকশন</th></tr></thead><tbody>`;
     if(pageItems.length === 0) {
         html += `<tr><td colspan="5" style="text-align:center; padding: 20px;">কোন ডেটা পাওয়া যায়নি</td></tr>`;
     } else {
         pageItems.forEach(d => {
             html += `<tr>
-                <td>${formatDate(d.date)}</td>
+                <td>${formatDateTime(d.createdAt, d.date)}</td>
                 <td>${d.name}<br><span style="font-size:10px; color:#777;">${d.mobile}</span></td>
                 <td style="color:#e74c3c; font-weight:bold;">${d.type === 'give' ? d.amount : '-'}</td>
                 <td style="color:#27ae60; font-weight:bold;">${d.type === 'take' ? d.amount : '-'}</td>
@@ -679,29 +694,18 @@ window.loadOutstanding = function() {
 
         snapshot.forEach(doc => {
             const d = doc.data();
-            if(!balances[d.name]) balances[d.name] = { given: 0, taken: 0, mobile: d.mobile, ids: [] };
-            balances[d.name].ids.push(doc.id);
+            if(!balances[d.name]) balances[d.name] = { given: 0, taken: 0, mobile: d.mobile };
             if(d.type === 'give') balances[d.name].given += d.amount;
             if(d.type === 'take') balances[d.name].taken += d.amount;
         });
 
-        let usersToDelete = [];
-
         for(let name in balances) {
             const outstanding = balances[name].given - balances[name].taken;
-            
-            if(outstanding === 0) {
-                usersToDelete.push(...balances[name].ids);
-            } else {
-                if(outstanding > 0) totalOutstanding += outstanding;
+            // বকেয়া ০ হলে ডাটাবেস থেকে ডিলিট করা হবে না, শুধু লিস্ট থেকে সরানো হবে
+            if(outstanding > 0) {
+                totalOutstanding += outstanding;
                 outstandingData.push({ name, mobile: balances[name].mobile, given: balances[name].given, taken: balances[name].taken, outstanding });
             }
-        }
-
-        if(usersToDelete.length > 0) {
-            usersToDelete.forEach(async (id) => {
-                await deleteDoc(doc(db, "transactions", id));
-            });
         }
 
         document.getElementById('total-outstanding-box').innerText = `মোট বকেয়া: ${totalOutstanding} টাকা`;
@@ -723,13 +727,12 @@ window.renderOutstanding = function() {
         html = "<p style='text-align:center; color:#777; margin-top:20px;'>কোন বকেয়া নেই।</p>";
     } else {
         pageItems.forEach(item => {
-            const color = item.outstanding > 0 ? '#e74c3c' : '#27ae60';
             html += `<div class="outstanding-card">
                 <div class="info">
                     <strong>${item.name}</strong> <span style="color:#777; font-size:11px;">${item.mobile ? item.mobile : ''}</span><br>
                     <span style="font-size:11px; color:#555;">দিয়েছেন: ${item.given} | পেয়েছেন: ${item.taken}</span>
                 </div>
-                <div class="amount" style="color:${color};">বকেয়া: ${item.outstanding} ৳</div>
+                <div class="amount">বকেয়া: ${item.outstanding} ৳</div>
             </div>`;
         });
     }

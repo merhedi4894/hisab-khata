@@ -13,30 +13,31 @@
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f0f2f5; color: #333; line-height: 1.6; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px 0; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        body { background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); color: #333; line-height: 1.6; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px 0; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
         
-        .wrapper { width: 100%; max-width: 800px; background: white; min-height: 95vh; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        .wrapper { width: 100%; max-width: 800px; background: white; min-height: 95vh; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
         
-        .header { background-color: #2c3e50; color: white; padding: 15px 20px; font-size: 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 15px 20px; font-size: 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .logout-btn { background: #e74c3c; padding: 6px 12px; font-size: 13px; width: auto; border-radius: 5px; }
         
-        .auth-card { width: 100%; max-width: 420px; margin: auto; padding: 30px; background: #fff; border-radius: 12px; }
-        .auth-title { text-align: center; color: #2c3e50; margin-bottom: 25px; font-size: 26px; }
+        /* Professional Colorful Auth Card */
+        .auth-card { width: 100%; max-width: 420px; margin: auto; padding: 40px 30px; background: #fff; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-top: 6px solid #3498db; }
+        .auth-title { text-align: center; color: #2c3e50; margin-bottom: 30px; font-size: 28px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
         
-        .auth-nav { display: flex; background: #ecf0f1; border-radius: 8px; padding: 4px; margin-bottom: 25px; gap: 4px; }
-        .auth-nav button { flex: 1; background: transparent; border: none; padding: 10px 5px; font-size: 13px; color: #7f8c8d; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
-        .auth-nav button.active { background: #2c3e50; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .auth-nav { display: flex; background: #f0f3f7; border-radius: 10px; padding: 5px; margin-bottom: 25px; gap: 5px; }
+        .auth-nav button { flex: 1; background: transparent; border: none; padding: 10px 5px; font-size: 13px; color: #7f8c8d; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .auth-nav button.active { background: linear-gradient(135deg, #3498db, #2980b9); color: white; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); }
         
-        input, select { width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #bdc3c7; border-radius: 8px; font-size: 15px; transition: border-color 0.3s; }
-        input:focus { border-color: #2c3e50; outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
-        button.btn-action { background-color: #2c3e50; color: white; border: none; cursor: pointer; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
-        button.btn-action:hover { background-color: #34495e; }
-        button:disabled { background-color: #95a5a6 !important; cursor: not-allowed; }
+        input, select { width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 2px solid #ecf0f1; border-radius: 8px; font-size: 15px; transition: all 0.3s; background: #f8f9fa; }
+        input:focus { border-color: #3498db; outline: none; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); background: #fff; }
+        button.btn-action { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; border: none; cursor: pointer; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-shadow: 0 4px 10px rgba(44, 62, 80, 0.2); }
+        button.btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(44, 62, 80, 0.3); }
+        button:disabled { background: #95a5a6 !important; cursor: not-allowed; transform: none; box-shadow: none; }
         
         .status-text { font-size: 13px; margin-top: -10px; margin-bottom: 10px; padding-left: 5px; }
 
         .password-container { position: relative; }
-        .eye-icon { position: absolute; right: 15px; top: 12px; cursor: pointer; font-size: 18px; color: #7f8c8d; }
+        .eye-icon { position: absolute; right: 15px; top: 14px; cursor: pointer; font-size: 18px; color: #7f8c8d; }
 
         .nav { display: flex; background: #34495e; padding: 0; overflow-x: auto; }
         .nav button { flex: 1; background: none; border: none; color: #bdc3c7; cursor: pointer; font-size: 15px; padding: 15px 10px; text-align: center; white-space: nowrap; transition: 0.3s; border-bottom: 3px solid transparent; }
@@ -49,54 +50,24 @@
         
         /* 3D Professional Outstanding Cards - Bright Colors */
         .outstanding-card-3d {
-            background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%); /* Light Bright Blue */
-            margin-bottom: 12px;
-            border-radius: 12px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+            margin-bottom: 12px; border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 10px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            overflow: hidden;
-            border: 1px solid #bbdefb;
+            transition: all 0.3s ease; cursor: pointer; overflow: hidden; border: 1px solid #bbdefb;
         }
         .outstanding-card-3d:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1);
             background: linear-gradient(135deg, #bbdefb 0%, #ffffff 100%);
         }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 15px;
-        }
+        .card-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 15px; }
         .card-header .info { flex: 1; }
         .card-header .info strong { font-size: 16px; color: #1565c0; }
         .card-header .amount { font-weight: bold; font-size: 16px; color: #d32f2f; text-align: right; }
         
-        /* Expandable Transaction History - Bright Colors */
-        .card-history {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-in-out;
-            background: linear-gradient(to bottom, #f1f8e9, #ffffff); /* Light Bright Green/White */
-        }
-        .card-history.expanded {
-            max-height: 500px;
-            overflow-y: auto;
-            border-top: 1px solid #dcedc8;
-        }
-        .mini-history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            border-bottom: 1px solid #f0f4f8;
-            font-size: 14px;
-            background: #ffffff;
-        }
-        .mini-history-item:nth-child(even) {
-            background: #e1f5fe; /* Alternating bright light blue */
-        }
+        .card-history { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; background: linear-gradient(to bottom, #f1f8e9, #ffffff); }
+        .card-history.expanded { max-height: 500px; overflow-y: auto; border-top: 1px solid #dcedc8; }
+        .mini-history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #f0f4f8; font-size: 14px; background: #ffffff; }
+        .mini-history-item:nth-child(even) { background: #e1f5fe; }
         .mini-history-item:last-child { border-bottom: none; }
         .mini-date { color: #546e7a; font-size: 12px; }
         .mini-amount { font-weight: bold; }
@@ -128,7 +99,10 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         #empty-home { text-align: center; padding-top: 80px; color: #95a5a6; }
-        .footer { text-align: center; margin-top: 30px; color: #95a5a6; font-size: 14px; }
+        
+        /* Footer Design */
+        .footer { text-align: center; margin-top: 30px; color: #7f8c8d; font-size: 14px; line-height: 1.4; }
+        .footer span { display: block; font-weight: bold; color: #3498db; font-size: 16px; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -160,15 +134,19 @@
                 <div id="email-status" class="status-text"></div>
                 <input type="text" id="su-mobile" placeholder="মোবাইল নম্বর">
                 <input type="password" id="su-password" placeholder="পাসওয়ার্ড">
-                <button id="signup-btn" onclick="signup()" class="btn-action" style="background-color: #27ae60;"><span id="signup-text">একাউন্ট তৈরি করুন</span></button>
+                <button id="signup-btn" onclick="signup()" class="btn-action" style="background: linear-gradient(135deg, #27ae60, #2ecc71);"><span id="signup-text">একাউন্ট তৈরি করুন</span></button>
             </div>
 
             <div id="reset-view" class="auth-view" style="display:none;">
                 <p style="font-size:13px; color:#7f8c8d; margin-bottom:15px;">পাসওয়ার্ড পুনরুদ্ধারের লিংকটি আপনার রেজিস্টার্ড ইমেইলে পাঠানো হবে।</p>
                 <input type="email" id="reset-email" placeholder="আপনার রেজিস্টার্ড ইমেইল দিন">
-                <button id="reset-btn" onclick="resetPassword()" class="btn-action" style="background-color: #f39c12;"><span id="reset-text">রিকভারি লিংক পাঠান</span></button>
+                <button id="reset-btn" onclick="resetPassword()" class="btn-action" style="background: linear-gradient(135deg, #f39c12, #e67e22);"><span id="reset-text">রিকভারি লিংক পাঠান</span></button>
             </div>
-            <div class="footer">Created by Mehedi Hasan</div>
+            
+            <div class="footer">
+                Created by
+                <span>Mehedi Hasan</span>
+            </div>
         </div>
     </div>
 
@@ -207,7 +185,7 @@
                 <div><label>নাম</label><input type="text" id="take-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('take')"></div>
                 <div><label>মোবাইল নম্বর</label><input type="text" id="take-mobile" list="mobiles-list" placeholder="মোবাইল নম্বর" oninput="autoFillName('take')"></div>
                 <div><label>পরিমাণ (টাকা)</label><input type="number" id="take-amount" placeholder="পরিমাণ"></div>
-                <div class="full-width"><button onclick="addTransaction('take')" class="btn-action" style="background-color: #3498db;">সেভ করুন</button></div>
+                <div class="full-width"><button onclick="addTransaction('take')" class="btn-action" style="background: linear-gradient(135deg, #3498db, #2980b9);">সেভ করুন</button></div>
             </div>
         </div>
         <datalist id="names-list"></datalist>
@@ -238,7 +216,7 @@
             <option value="give">টাকা দিচ্ছি</option>
             <option value="take">টাকা নিচ্ছি</option>
         </select>
-        <button onclick="updateTransaction()" class="btn-action" style="background-color: #f39c12; margin-top: 10px;">আপডেট করুন</button>
+        <button onclick="updateTransaction()" class="btn-action" style="background: linear-gradient(135deg, #f39c12, #e67e22); margin-top: 10px;">আপডেট করুন</button>
     </div>
 </div>
 
@@ -246,7 +224,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -263,8 +241,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// স্ট্রিক্ট লগইনের জন্য InMemoryPersistence সেট করা হলো (রিফ্রেশ দিলে বা ঢুকলে লগআউট হবে)
-setPersistence(auth, inMemoryPersistence);
+// রিফ্রেশ দিলে লগইন থাকবে, কিন্তু ১০ মিনিট নিষ্ক্রিয় থাকলে লগআউট হবে
+setPersistence(auth, browserSessionPersistence);
 
 window.auth = auth;
 window.db = db;
@@ -371,15 +349,8 @@ function setupInactivityTimer() {
     document.addEventListener(event, setupInactivityTimer, false);
 });
 
-// স্ক্রিনশট ও রাইট ক্লিক প্রটেকশন
+// স্ক্রিনশট ও ডাটা কপি প্রটেকশন
 document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-        document.body.style.filter = "blur(8px)";
-    } else {
-        document.body.style.filter = "none";
-    }
-});
 document.addEventListener("keyup", function(e) {
     if (e.key === "PrintScreen") {
         navigator.clipboard.writeText('');
@@ -440,10 +411,16 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById('auth-section').style.display = 'none';
         document.getElementById('app-section').style.display = 'flex';
         
+        // রিফ্রেশ দিলে আগের পেজেই ফিরে যাবে
+        let activeSection = sessionStorage.getItem('activeSection') || 'outstanding-section';
+        let btnId = 'nav-' + activeSection.replace('-section', '');
+        
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById('outstanding-section').classList.add('active');
-        document.getElementById('nav-outstanding').classList.add('active');
+        
+        document.getElementById(activeSection).classList.add('active');
+        let btn = document.getElementById(btnId);
+        if(btn) btn.classList.add('active');
         
         loadOutstanding();
         loadHistory();
@@ -572,7 +549,11 @@ window.showSection = function(id, btn) {
     document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
     
     document.getElementById(id).classList.add('active');
-    btn.classList.add('active');
+    if(btn) btn.classList.add('active');
+    
+    // বর্তমান পেজ সেশনে সেভ করে রাখা হলো যাতে রিফ্রেশ দিলে এখানেই ফিরে আসে
+    sessionStorage.setItem('activeSection', id);
+    
     if(id === 'give-section' || id === 'take-section') setDefaultDates();
 }
 

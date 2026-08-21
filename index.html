@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>লেনদেন খাতা</title>
     
-    <!-- PWA Setup (manifest.json এবং icon.png গিটহাব থেকে লোড হবে) -->
+    <!-- PWA Setup -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="icon" href="icon.png">
@@ -13,7 +13,7 @@
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f0f2f5; color: #333; line-height: 1.6; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px 0; }
+        body { background-color: #f0f2f5; color: #333; line-height: 1.6; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px 0; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
         
         .wrapper { width: 100%; max-width: 800px; background: white; min-height: 95vh; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
         
@@ -45,62 +45,61 @@
         
         .section { padding: 25px; flex-grow: 1; overflow-y: auto; display: none; }
         .section.active { display: block; }
-        .section h3 { margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; font-size: 18px; }
+        .section h3 { margin-bottom: 15px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; font-size: 18px; }
         
-        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border-radius: 8px; border: 1px solid #ecf0f1; }
-        table { width: 100%; border-collapse: collapse; min-width: 100%; }
-        th, td { border-bottom: 1px solid #ecf0f1; padding: 12px 10px; text-align: left; font-size: 14px; }
-        th { background-color: #f8f9fa; color: #2c3e50; font-weight: 600; position: sticky; top: 0; }
-        tr:hover { background-color: #f1f1f1; }
-        .btn-sm { padding: 6px 10px; font-size: 14px; width: auto; margin-right: 2px; border-radius: 5px; border: none; cursor: pointer; color: white; font-weight: bold;}
-        .bg-red { background: #e74c3c; }
-        .bg-orange { background: #f39c12; }
-
-        /* 3D Professional Outstanding Cards */
+        /* 3D Professional Outstanding Cards - Bright Colors */
         .outstanding-card-3d {
-            background: linear-gradient(135deg, #ffffff 0%, #f4f7f9 100%);
+            background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%); /* Light Bright Blue */
             margin-bottom: 12px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 10px 15px rgba(0,0,0,0.1); /* 3D Shadow */
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 10px 15px rgba(0,0,0,0.05);
             transition: all 0.3s ease;
             cursor: pointer;
             overflow: hidden;
-            border: 1px solid #e0e6ed;
+            border: 1px solid #bbdefb;
         }
         .outstanding-card-3d:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #bbdefb 0%, #ffffff 100%);
         }
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 15px;
-            background: linear-gradient(to right, rgba(231, 76, 60, 0.05), transparent);
+            padding: 15px 15px;
         }
         .card-header .info { flex: 1; }
-        .card-header .info strong { font-size: 15px; color: #2c3e50; }
-        .card-header .amount { font-weight: bold; font-size: 15px; color: #e74c3c; text-align: right; }
+        .card-header .info strong { font-size: 16px; color: #1565c0; }
+        .card-header .amount { font-weight: bold; font-size: 16px; color: #d32f2f; text-align: right; }
         
+        /* Expandable Transaction History - Bright Colors */
         .card-history {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.4s ease-in-out;
-            background: #f8f9fa;
+            background: linear-gradient(to bottom, #f1f8e9, #ffffff); /* Light Bright Green/White */
         }
         .card-history.expanded {
             max-height: 500px;
             overflow-y: auto;
-            border-top: 1px solid #e0e6ed;
+            border-top: 1px solid #dcedc8;
         }
         .mini-history-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 15px;
-            border-bottom: 1px dashed #ccc;
-            font-size: 13px;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f4f8;
+            font-size: 14px;
+            background: #ffffff;
+        }
+        .mini-history-item:nth-child(even) {
+            background: #e1f5fe; /* Alternating bright light blue */
         }
         .mini-history-item:last-child { border-bottom: none; }
+        .mini-date { color: #546e7a; font-size: 12px; }
+        .mini-amount { font-weight: bold; }
 
         .total-box { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 12px 15px; border-radius: 8px; text-align: right; font-weight: bold; font-size: 16px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 
@@ -123,19 +122,6 @@
         @media (min-width: 768px) {
             .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
             .form-grid .full-width { grid-column: span 2; }
-        }
-        
-        @media (max-width: 600px) {
-            .section { padding: 10px; }
-            .table-wrap { overflow-x: hidden; }
-            table { table-layout: fixed; width: 100%; }
-            th, td { padding: 5px 2px; font-size: 10px; line-height: 1.3; vertical-align: middle; }
-            th:nth-child(1), td:nth-child(1) { width: 28%; white-space: normal; word-break: break-word; }
-            th:nth-child(2), td:nth-child(2) { width: 25%; white-space: normal; word-break: break-word; }
-            th:nth-child(3), td:nth-child(3) { width: 15%; text-align: center; }
-            th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; }
-            th:nth-child(5), td:nth-child(5) { width: 17%; text-align: right; white-space: nowrap; }
-            .btn-sm { padding: 3px 5px; font-size: 11px; margin: 0; }
         }
         
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
@@ -195,7 +181,6 @@
         <div class="nav">
             <button id="nav-give" onclick="showSection('give-section', this)">টাকা দিচ্ছি</button>
             <button id="nav-take" onclick="showSection('take-section', this)">টাকা নিচ্ছি</button>
-            <button id="nav-history" onclick="showSection('history-section', this)">ইতিহাস</button>
             <button id="nav-outstanding" onclick="showSection('outstanding-section', this)">মোট বকেয়া</button>
         </div>
 
@@ -228,16 +213,12 @@
         <datalist id="names-list"></datalist>
         <datalist id="mobiles-list"></datalist>
 
-        <div id="history-section" class="section">
-            <h3>ইতিহাস</h3>
-            <input type="text" id="search-name" placeholder="নাম বা মোবাইল নম্বর দিয়ে সার্চ করুন" onkeyup="renderHistory()">
-            <div class="table-wrap"><div id="history-table"></div></div>
-            <div class="pagination" id="pagination-controls"></div>
-        </div>
-
         <div id="outstanding-section" class="section">
             <h3>মোট বকেয়া তালিকা</h3>
             <div class="total-box" id="total-outstanding-box">মোট বকেয়া: 0 টাকা</div>
+            
+            <input type="text" id="search-outstanding" placeholder="নাম দিয়ে সার্চ করুন..." onkeyup="renderOutstanding()" style="margin-bottom: 15px;">
+            
             <div id="outstanding-list"></div>
             <div class="pagination" id="outstanding-pagination-controls"></div>
         </div>
@@ -265,7 +246,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -282,7 +263,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-setPersistence(auth, browserSessionPersistence);
+// স্ট্রিক্ট লগইনের জন্য InMemoryPersistence সেট করা হলো (রিফ্রেশ দিলে বা ঢুকলে লগআউট হবে)
+setPersistence(auth, inMemoryPersistence);
 
 window.auth = auth;
 window.db = db;
@@ -291,7 +273,6 @@ let allTransactions = [];
 let nameMobileMap = {}; 
 let mobileNameMap = {}; 
 let outstandingData = [];
-let currentPage = 1;
 let currentOutstandingPage = 1;
 const itemsPerPage = 8;
 let inactivityTimer;
@@ -374,19 +355,36 @@ function loadSavedUsers() {
 }
 loadSavedUsers();
 
+// ১০ মিনিট (৬০০,০০০ মিলিসেকেন্ড) নিষ্ক্রিয় থাকলে অটো লগআউট
 function setupInactivityTimer() {
     clearTimeout(inactivityTimer);
     if (auth.currentUser) {
         inactivityTimer = setTimeout(() => {
             signOut(auth).then(() => {
-                showToast("৫ মিনিট নিষ্ক্রিয় থাকার কারণে অটো লগআউট হয়েছে।", true);
+                showToast("১০ মিনিট নিষ্ক্রিয় থাকার কারণে অটো লগআউট হয়েছে।", true);
                 setTimeout(() => window.location.reload(), 2000);
             });
-        }, 300000); 
+        }, 600000); 
     }
 }
 ['mousemove', 'mousedown', 'keydown', 'touchstart'].forEach(event => {
     document.addEventListener(event, setupInactivityTimer, false);
+});
+
+// স্ক্রিনশট ও রাইট ক্লিক প্রটেকশন
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        document.body.style.filter = "blur(8px)";
+    } else {
+        document.body.style.filter = "none";
+    }
+});
+document.addEventListener("keyup", function(e) {
+    if (e.key === "PrintScreen") {
+        navigator.clipboard.writeText('');
+        showToast("স্ক্রিনশট নেওয়া যাবে না!", true);
+    }
 });
 
 const suUsernameInput = document.getElementById('su-username');
@@ -645,67 +643,8 @@ window.loadHistory = function() {
         snapshot.forEach(doc => {
             allTransactions.push({ id: doc.id, ...doc.data() });
         });
-        renderHistory();
+        renderOutstanding(); 
     });
-}
-
-window.renderHistory = function() {
-    const searchVal = document.getElementById('search-name').value.toLowerCase();
-    let filtered = allTransactions.filter(t => 
-        t.name.toLowerCase().includes(searchVal) || (t.mobile && t.mobile.includes(searchVal))
-    );
-    
-    if(searchVal) {
-        filtered.sort((a, b) => {
-            let timeA = a.createdAt || (a.date + 'T00:00:00');
-            let timeB = b.createdAt || (b.date + 'T00:00:00');
-            return timeA.localeCompare(timeB);
-        });
-    } else {
-        filtered.sort((a, b) => {
-            let timeA = a.createdAt || (a.date + 'T23:59:59');
-            let timeB = b.createdAt || (b.date + 'T23:59:59');
-            return timeB.localeCompare(timeA);
-        });
-    }
-    
-    const totalPages = Math.ceil(filtered.length / itemsPerPage);
-    if(currentPage > totalPages) currentPage = 1;
-    
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const pageItems = filtered.slice(start, end);
-
-    let html = `<table><thead><tr><th>তারিখ ও সময়</th><th>নাম</th><th>দিলাম</th><th>পেলাম</th><th>অ্যাকশন</th></tr></thead><tbody>`;
-    if(pageItems.length === 0) {
-        html += `<tr><td colspan="5" style="text-align:center; padding: 20px;">কোন ডেটা পাওয়া যায়নি</td></tr>`;
-    } else {
-        pageItems.forEach(d => {
-            html += `<tr>
-                <td>${formatDateTime(d.createdAt, d.date)}</td>
-                <td>${d.name}<br><span style="font-size:10px; color:#777;">${d.mobile}</span></td>
-                <td style="color:#e74c3c; font-weight:bold;">${d.type === 'give' ? d.amount : '-'}</td>
-                <td style="color:#27ae60; font-weight:bold;">${d.type === 'take' ? d.amount : '-'}</td>
-                <td>
-                    <button class="btn-sm bg-orange" onclick="openEditModal('${d.id}')" title="এডিট">✏️</button>
-                    <button class="btn-sm bg-red" onclick="deleteData('${d.id}')" title="ডিলিট">🗑️</button>
-                </td>
-            </tr>`;
-        });
-    }
-    html += `</tbody></table>`;
-    document.getElementById('history-table').innerHTML = html;
-
-    let pHtml = '';
-    if(currentPage > 1) pHtml += `<button onclick="changePage(${currentPage - 1})">পূর্ববর্তী</button>`;
-    pHtml += `<div class="page-info">পেজ ${currentPage} / ${totalPages || 1}</div>`;
-    if(currentPage < totalPages) pHtml += `<button onclick="changePage(${currentPage + 1})">পরবর্তী</button>`;
-    document.getElementById('pagination-controls').innerHTML = pHtml;
-}
-
-window.changePage = function(page) {
-    currentPage = page;
-    renderHistory();
 }
 
 window.deleteData = async function(id) {
@@ -774,11 +713,9 @@ window.loadOutstanding = function() {
     });
 }
 
-// 3D Card Expandable History
 window.toggleCardHistory = function(name) {
     const div = document.getElementById(`history-${name}`);
     
-    // Close other open cards
     document.querySelectorAll('.card-history.expanded').forEach(el => {
         if(el.id !== `history-${name}`) {
             el.classList.remove('expanded');
@@ -792,7 +729,6 @@ window.toggleCardHistory = function(name) {
         return;
     }
 
-    // Get and sort transactions for this person (Newest first)
     let userTxs = allTransactions.filter(t => t.name === name);
     userTxs.sort((a, b) => {
         let timeA = a.createdAt || (a.date + 'T23:59:59');
@@ -802,11 +738,11 @@ window.toggleCardHistory = function(name) {
 
     let html = '';
     userTxs.forEach(t => {
-        let color = t.type === 'give' ? '#e74c3c' : '#27ae60';
+        let color = t.type === 'give' ? '#d32f2f' : '#2e7d32';
         let sign = t.type === 'give' ? '-' : '+';
         html += `<div class="mini-history-item">
-            <span>${formatDateTime(t.createdAt, t.date)}</span>
-            <span style="color:${color}; font-weight:bold;">${sign} ${t.amount} ৳</span>
+            <span class="mini-date">${formatDateTime(t.createdAt, t.date)}</span>
+            <span class="mini-amount" style="color:${color};">${sign} ${t.amount} ৳</span>
         </div>`;
     });
 
@@ -815,16 +751,21 @@ window.toggleCardHistory = function(name) {
 }
 
 window.renderOutstanding = function() {
-    const totalPages = Math.ceil(outstandingData.length / itemsPerPage);
+    const searchVal = document.getElementById('search-outstanding').value.toLowerCase();
+    let filteredOutstanding = outstandingData.filter(item => 
+        item.name.toLowerCase().includes(searchVal) || (item.mobile && item.mobile.includes(searchVal))
+    );
+
+    const totalPages = Math.ceil(filteredOutstanding.length / itemsPerPage);
     if(currentOutstandingPage > totalPages) currentOutstandingPage = 1;
     
     const start = (currentOutstandingPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
-    const pageItems = outstandingData.slice(start, end);
+    const pageItems = filteredOutstanding.slice(start, end);
 
     let html = '';
     if(pageItems.length === 0) {
-        html = "<p style='text-align:center; color:#777; margin-top:20px;'>কোন বকেয়া নেই।</p>";
+        html = "<p style='text-align:center; color:#777; margin-top:20px;'>কোন বকেয়া নেই বা সার্চ ফলাফল পাওয়া যায়নি।</p>";
     } else {
         pageItems.forEach(item => {
             html += `<div class="outstanding-card-3d" onclick="toggleCardHistory('${item.name}')">

@@ -13,19 +13,26 @@
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); color: #333; line-height: 1.6; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px 0; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        body { background: #f0f2f5; color: #333; line-height: 1.6; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
         
-        .wrapper { width: 100%; max-width: 800px; background: white; min-height: 95vh; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        .wrapper { width: 100%; max-width: 800px; background: white; min-height: 95vh; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; z-index: 1; }
         
         .header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 15px 20px; font-size: 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .logout-btn { background: #e74c3c; padding: 6px 12px; font-size: 13px; width: auto; border-radius: 5px; }
         
-        /* Professional Colorful Auth Card */
-        .auth-card { width: 100%; max-width: 420px; margin: auto; padding: 40px 30px; background: #fff; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-top: 6px solid #3498db; }
-        .auth-title { text-align: center; color: #2c3e50; margin-bottom: 30px; font-size: 28px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        /* Professional Split Screen Auth Layout */
+        .auth-container { display: flex; min-height: 100vh; background: #fff; }
+        .auth-branding { flex: 1; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px; }
+        .auth-branding h1 { font-size: 36px; margin-bottom: 15px; font-weight: 800; }
+        .auth-branding p { font-size: 16px; opacity: 0.9; max-width: 300px; }
+        
+        .auth-form-side { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; background: #f8f9fa; }
+        
+        .auth-card { width: 100%; max-width: 380px; background: #fff; padding: 40px 30px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-top: 6px solid #3498db; }
+        .auth-title { text-align: center; color: #2c3e50; margin-bottom: 30px; font-size: 24px; font-weight: 800; display: none; /* Hidden for desktop split view */ }
         
         .auth-nav { display: flex; background: #f0f3f7; border-radius: 10px; padding: 5px; margin-bottom: 25px; gap: 5px; }
-        .auth-nav button { flex: 1; background: transparent; border: none; padding: 10px 5px; font-size: 13px; color: #7f8c8d; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .auth-nav button { flex: 1; background: transparent; border: none; padding: 10px 5px; font-size: 12px; color: #7f8c8d; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
         .auth-nav button.active { background: linear-gradient(135deg, #3498db, #2980b9); color: white; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); }
         
         input, select { width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 2px solid #ecf0f1; border-radius: 8px; font-size: 15px; transition: all 0.3s; background: #f8f9fa; }
@@ -48,17 +55,9 @@
         .section.active { display: block; }
         .section h3 { margin-bottom: 15px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; font-size: 18px; }
         
-        /* 3D Professional Outstanding Cards - Bright Colors */
-        .outstanding-card-3d {
-            background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
-            margin-bottom: 12px; border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 10px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s ease; cursor: pointer; overflow: hidden; border: 1px solid #bbdefb;
-        }
-        .outstanding-card-3d:hover {
-            transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-            background: linear-gradient(135deg, #bbdefb 0%, #ffffff 100%);
-        }
+        /* 3D Professional Outstanding Cards */
+        .outstanding-card-3d { background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%); margin-bottom: 12px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 10px 15px rgba(0,0,0,0.05); transition: all 0.3s ease; cursor: pointer; overflow: hidden; border: 1px solid #bbdefb; }
+        .outstanding-card-3d:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); background: linear-gradient(135deg, #bbdefb 0%, #ffffff 100%); }
         .card-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 15px; }
         .card-header .info { flex: 1; }
         .card-header .info strong { font-size: 16px; color: #1565c0; }
@@ -95,26 +94,44 @@
             .form-grid .full-width { grid-column: span 2; }
         }
         
+        /* Mobile Responsiveness for Login */
+        @media (max-width: 768px) {
+            .auth-branding { display: none; }
+            .auth-title { display: block; }
+            .auth-form-side { padding: 40px 20px; }
+        }
+        
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         #empty-home { text-align: center; padding-top: 80px; color: #95a5a6; }
-        
-        /* Footer Design */
         .footer { text-align: center; margin-top: 30px; color: #7f8c8d; font-size: 14px; line-height: 1.4; }
         .footer span { display: block; font-weight: bold; color: #3498db; font-size: 16px; margin-top: 2px; }
+        
+        /* Screenshot Protection Overlay */
+        #protection-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <div id="auth-section" style="display:flex; flex-direction:column; justify-content:center; flex-grow:1;">
+<!-- Protection Overlay for Screenshots -->
+<div id="protection-overlay"></div>
+
+<div class="auth-container">
+    <!-- Branding Side (Desktop) -->
+    <div class="auth-branding">
+        <h1>লেনদেন খাতা</h1>
+        <p>আপনার দৈনন্দিন লেনদেন এবং বকেয়ার হিসাব রাখার সবচেয়ে নিরাপদ ও সহজ ডিজিটাল মাধ্যম। যেকোনো সময়, যেকোনো জায়গা থেকে আপনার হিসাব পরিচালনা করুন।</p>
+    </div>
+
+    <!-- Form Side -->
+    <div class="auth-form-side">
         <div class="auth-card">
             <h2 class="auth-title">লেনদেন খাতা</h2>
             <div class="auth-nav">
                 <button onclick="showAuthView('login')" id="btn-login" class="active">লগ ইন</button>
                 <button onclick="showAuthView('signup')" id="btn-signup">সাইন আপ</button>
-                <button onclick="showAuthView('reset')" id="btn-reset">পাসওয়ার্ড পুনরুদ্ধার</button>
+                <button onclick="showAuthView('reset')" id="btn-reset">পাসওয়ার্ড পুনরুদ্ধার</button>
             </div>
 
             <div id="login-view" class="auth-view">
@@ -149,57 +166,58 @@
             </div>
         </div>
     </div>
+</div>
 
-    <div id="app-section" style="display:none; flex-grow:1; flex-direction:column;">
-        <div class="header">
-            লেনদেন খাতা 
-            <button class="logout-btn" onclick="logout()">লগআউট</button>
+<!-- Main App Section -->
+<div id="app-section" style="display:none; width: 100%; max-width: 800px; margin: 0 auto; background: white; min-height: 100vh; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; flex-direction:column;">
+    <div class="header">
+        লেনদেন খাতা 
+        <button class="logout-btn" onclick="logout()">লগআউট</button>
+    </div>
+    
+    <div class="nav">
+        <button id="nav-give" onclick="showSection('give-section', this)">টাকা দিচ্ছি</button>
+        <button id="nav-take" onclick="showSection('take-section', this)">টাকা নিচ্ছি</button>
+        <button id="nav-outstanding" onclick="showSection('outstanding-section', this)">মোট বকেয়া</button>
+    </div>
+
+    <div id="empty-home" class="section">
+        <h2>স্বাগতম!</h2>
+        <p style="margin-top: 10px;">অনুগ্রহ করে উপরের মেনু থেকে যেকোনো একটি অপশন নির্বাচন করুন।</p>
+    </div>
+
+    <div id="give-section" class="section">
+        <h3>টাকা দিচ্ছি (ধার দিলাম)</h3>
+        <div class="form-grid">
+            <div><label>তারিখ</label><input type="date" id="give-date"></div>
+            <div><label>নাম</label><input type="text" id="give-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('give')"></div>
+            <div><label>মোবাইল নম্বর</label><input type="text" id="give-mobile" list="mobiles-list" placeholder="মোবাইল নম্বর" oninput="autoFillName('give')"></div>
+            <div><label>পরিমাণ (টাকা)</label><input type="number" id="give-amount" placeholder="পরিমাণ"></div>
+            <div class="full-width"><button onclick="addTransaction('give')" class="btn-action">সেভ করুন</button></div>
         </div>
+    </div>
+
+    <div id="take-section" class="section">
+        <h3>টাকা নিচ্ছি (পরিশোধ পেলাম)</h3>
+        <div class="form-grid">
+            <div><label>তারিখ</label><input type="date" id="take-date"></div>
+            <div><label>নাম</label><input type="text" id="take-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('take')"></div>
+            <div><label>মোবাইল নম্বর</label><input type="text" id="take-mobile" list="mobiles-list" placeholder="মোবাইল নম্বর" oninput="autoFillName('take')"></div>
+            <div><label>পরিমাণ (টাকা)</label><input type="number" id="take-amount" placeholder="পরিমাণ"></div>
+            <div class="full-width"><button onclick="addTransaction('take')" class="btn-action" style="background: linear-gradient(135deg, #3498db, #2980b9);">সেভ করুন</button></div>
+        </div>
+    </div>
+    <datalist id="names-list"></datalist>
+    <datalist id="mobiles-list"></datalist>
+
+    <div id="outstanding-section" class="section">
+        <h3>মোট বকেয়া তালিকা</h3>
+        <div class="total-box" id="total-outstanding-box">মোট বকেয়া: 0 টাকা</div>
         
-        <div class="nav">
-            <button id="nav-give" onclick="showSection('give-section', this)">টাকা দিচ্ছি</button>
-            <button id="nav-take" onclick="showSection('take-section', this)">টাকা নিচ্ছি</button>
-            <button id="nav-outstanding" onclick="showSection('outstanding-section', this)">মোট বকেয়া</button>
-        </div>
-
-        <div id="empty-home" class="section">
-            <h2>স্বাগতম!</h2>
-            <p style="margin-top: 10px;">অনুগ্রহ করে উপরের মেনু থেকে যেকোনো একটি অপশন নির্বাচন করুন।</p>
-        </div>
-
-        <div id="give-section" class="section">
-            <h3>টাকা দিচ্ছি (ধার দিলাম)</h3>
-            <div class="form-grid">
-                <div><label>তারিখ</label><input type="date" id="give-date"></div>
-                <div><label>নাম</label><input type="text" id="give-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('give')"></div>
-                <div><label>মোবাইল নম্বর</label><input type="text" id="give-mobile" list="mobiles-list" placeholder="মোবাইল নম্বর" oninput="autoFillName('give')"></div>
-                <div><label>পরিমাণ (টাকা)</label><input type="number" id="give-amount" placeholder="পরিমাণ"></div>
-                <div class="full-width"><button onclick="addTransaction('give')" class="btn-action">সেভ করুন</button></div>
-            </div>
-        </div>
-
-        <div id="take-section" class="section">
-            <h3>টাকা নিচ্ছি (পরিশোধ পেলাম)</h3>
-            <div class="form-grid">
-                <div><label>তারিখ</label><input type="date" id="take-date"></div>
-                <div><label>নাম</label><input type="text" id="take-name" list="names-list" placeholder="নাম লিখুন" oninput="autoFillMobile('take')"></div>
-                <div><label>মোবাইল নম্বর</label><input type="text" id="take-mobile" list="mobiles-list" placeholder="মোবাইল নম্বর" oninput="autoFillName('take')"></div>
-                <div><label>পরিমাণ (টাকা)</label><input type="number" id="take-amount" placeholder="পরিমাণ"></div>
-                <div class="full-width"><button onclick="addTransaction('take')" class="btn-action" style="background: linear-gradient(135deg, #3498db, #2980b9);">সেভ করুন</button></div>
-            </div>
-        </div>
-        <datalist id="names-list"></datalist>
-        <datalist id="mobiles-list"></datalist>
-
-        <div id="outstanding-section" class="section">
-            <h3>মোট বকেয়া তালিকা</h3>
-            <div class="total-box" id="total-outstanding-box">মোট বকেয়া: 0 টাকা</div>
-            
-            <input type="text" id="search-outstanding" placeholder="নাম দিয়ে সার্চ করুন..." onkeyup="renderOutstanding()" style="margin-bottom: 15px;">
-            
-            <div id="outstanding-list"></div>
-            <div class="pagination" id="outstanding-pagination-controls"></div>
-        </div>
+        <input type="text" id="search-outstanding" placeholder="নাম দিয়ে সার্চ করুন..." onkeyup="renderOutstanding()" style="margin-bottom: 15px;">
+        
+        <div id="outstanding-list"></div>
+        <div class="pagination" id="outstanding-pagination-controls"></div>
     </div>
 </div>
 
@@ -241,7 +259,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// রিফ্রেশ দিলে লগইন থাকবে, কিন্তু ১০ মিনিট নিষ্ক্রিয় থাকলে লগআউট হবে
 setPersistence(auth, browserSessionPersistence);
 
 window.auth = auth;
@@ -333,7 +350,6 @@ function loadSavedUsers() {
 }
 loadSavedUsers();
 
-// ১০ মিনিট (৬০০,০০০ মিলিসেকেন্ড) নিষ্ক্রিয় থাকলে অটো লগআউট
 function setupInactivityTimer() {
     clearTimeout(inactivityTimer);
     if (auth.currentUser) {
@@ -349,8 +365,20 @@ function setupInactivityTimer() {
     document.addEventListener(event, setupInactivityTimer, false);
 });
 
-// স্ক্রিনশট ও ডাটা কপি প্রটেকশন
+// Enhanced Screenshot & Copy Protection
 document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('copy', e => e.preventDefault());
+
+const overlay = document.getElementById('protection-overlay');
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        overlay.style.display = 'block';
+    } else {
+        overlay.style.display = 'none';
+    }
+});
+
 document.addEventListener("keyup", function(e) {
     if (e.key === "PrintScreen") {
         navigator.clipboard.writeText('');
@@ -408,10 +436,9 @@ suEmailInput.addEventListener('input', () => {
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        document.getElementById('auth-section').style.display = 'none';
+        document.querySelector('.auth-container').style.display = 'none';
         document.getElementById('app-section').style.display = 'flex';
         
-        // রিফ্রেশ দিলে আগের পেজেই ফিরে যাবে
         let activeSection = sessionStorage.getItem('activeSection') || 'outstanding-section';
         let btnId = 'nav-' + activeSection.replace('-section', '');
         
@@ -427,7 +454,7 @@ onAuthStateChanged(auth, (user) => {
         loadNames();
         setupInactivityTimer();
     } else {
-        document.getElementById('auth-section').style.display = 'flex';
+        document.querySelector('.auth-container').style.display = 'flex';
         document.getElementById('app-section').style.display = 'none';
         showAuthView('login'); 
         clearTimeout(inactivityTimer);
@@ -551,7 +578,6 @@ window.showSection = function(id, btn) {
     document.getElementById(id).classList.add('active');
     if(btn) btn.classList.add('active');
     
-    // বর্তমান পেজ সেশনে সেভ করে রাখা হলো যাতে রিফ্রেশ দিলে এখানেই ফিরে আসে
     sessionStorage.setItem('activeSection', id);
     
     if(id === 'give-section' || id === 'take-section') setDefaultDates();
